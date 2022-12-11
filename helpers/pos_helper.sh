@@ -62,7 +62,7 @@ setupExperiment() {
 		echo "      $node host setup successfull";
 		echo "    running experiment setup of $node";
 		"$POS" comm laun --blocking "$node" -- \
-			/bin/bash "$path"experiment-setup.sh "${PROTOCOLS[*]}" "$ipaddr" "$SWAP" "$NETWORK" "${NODES[*]}";
+			/bin/bash "$path"experiment-setup.sh "$ipaddr" "$SWAP" "$NETWORK" "${NODES[*]}";
 		echo "      $node experiment setup successfull"; 
 		} &
 		PIDS+=( $! )
@@ -76,15 +76,12 @@ runExperiment() {
 	player=0
 	path=/root/sevarebench/host_scripts
 	script="$path"/measurement.sh
-	cdomain=$1
-	declare -n cdProtocols="${cdomain}PROTOCOLS"
 		
 	for node in "${NODES[@]}"; do
 		echo "    execute experiment on host $node..."
 		# the reset removes the compiled binaries, to make place for the next comp domain
-		{ 	"$POS" comm laun --blocking "$node" -- /bin/bash "$path"/experiment-reset.sh;
-			"$POS" comm laun --blocking --loop "$node" -- \
-				/bin/bash "$script" "$player" "$cdomain" "${cdProtocols[*]}" "${TTYPES[*]}" "$NETWORK" "${#NODES[*]}" "$ETYPE";
+		{	"$POS" comm laun --blocking --loop "$node" -- \
+			/bin/bash "$script" "$player" "${TTYPES[*]}" "$NETWORK" "${#NODES[*]}" "$ETYPE";
 		} &
 		PIDS+=( $! )
 		((++player))

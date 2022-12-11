@@ -16,44 +16,31 @@ source "$REPO2_DIR"/protocols.sh
 EXPERIMENT=$(pos_get_variable experiment --from-global)
 runflags=$(pos_get_variable runflags --from-global)
 size=$(pos_get_variable input_size --from-loop)
-timerf="%M (Maximum resident set size in kbytes)\n%e (Elapsed wall clock time in seconds)\n%P (Percent of CPU this job got)"
+protocol=$(pos_get_variable protocols --from-loop)
+datatype=$(pos_get_variable datatype --from-loop)
+preprocess=$(pos_get_variable preprocess --from-loop)
+
+timerf="%M (Maximum resident set size in kbytes)\n\
+        %e (Elapsed wall clock time in seconds)\n\
+        %P (Percent of CPU this job got)"
 player=$1
-cdomain=$2
 environ=""
-read -r -a protocols <<< "$3"
 # test types to simulate changing environments like cpu frequency or network latency
-read -r -a types <<< "$4"
-network="$5"
-partysize=$6
+read -r -a types <<< "$2"
+network="$3"
+partysize=$4
 # experiment type to allow small differences in experiments
-etype=$7
+etype=$5
 
 cd "$REPO_DIR"
 
 {
-    echo "player: $player, cdomain: $cdomain, protocols: ${protocols[*]}, types: ${types[*]}"
+    echo "player: $player, protocol: $protocol, types: ${types[*]}"
 
-    # experiment specific part: generate random input
-    echo "create $partysize random set of size: $size"
-    bash "$REPO2_DIR"/experiments/"$EXPERIMENT"/generatepinput.sh "$size" "$partysize" "$etype"
+    # compile experiment
+    /bin/time ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+        -s "$protocol" -e "$preprocess"
 
-    # MP-SPDZ specific part: compile experiment
-    # only compile if not already compiled
-    binarypath="Programs/Bytecode/experiment-$size-$partysize-$etype-0.bc"
-    if [ ! -f "$binarypath" ]; then
-        case "$cdomain" in
-            RING) 
-                /bin/time -f "$timerf" ./compile.py -R 64 experiment "$size" "$partysize" "$etype";;
-            BINARY) 
-                /bin/time -f "$timerf" ./compile.py -B 64 experiment "$size" "$partysize" "$etype";;
-            *) # default to FIELD
-                /bin/time -f "$timerf" ./compile.py experiment "$size" "$partysize" "$etype";;
-        esac
-        echo "$(du -BM "$binarypath" | cut -d 'M' -f 1) (Binary file size in MiB)"
-    fi
-
-    # unconcealed verification run
-    "$REPO2_DIR"/experiments/"$EXPERIMENT"/experiment.py "$etype"
 } |& tee measurementlog"$cdomain"
 
 ####
@@ -95,50 +82,28 @@ esac
 #  environment manipulation section stop
 ####
 
-for protocol in "${protocols[@]}"; do
+log=testresults"$protocol"
+touch "$log"
 
-    log=testresults"$cdomain""${protocol::-8}"
-    touch "$log"
+success=true
 
-    success=true
+pos_sync --timeout 300
 
-    pos_sync --timeout 300
+# define ip addresses of the other party members
+[ "$ipaddr" -eq 2 ] && ipA=10.10."$network".3 && ipB=10.10."$network".4
+[ "$ipaddr" -eq 3 ] && ipA=10.10."$network".2 && ipB=10.10."$network".4
+[ "$ipaddr" -eq 4 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
 
-    # Some protocols are only for 2,3 or 4 parties
-    # they imply the flag -N so it's not allowed
-    extraflag="-N $partysize"
-    # need to skip for some nodes
-    skip=false
-    if [[ " ${N4Protocols[*]} " == *" ${protocol::-8} "* ]]; then
-        extraflag=""
-        [ "$player" -lt 4 ] || skip=true
-    elif [[ " ${N3Protocols[*]} " == *" ${protocol::-8} "* ]]; then
-        extraflag=""
-        [ "$player" -lt 3 ] || skip=true
-    elif [[ " ${N2Protocols[*]} " == *" ${protocol::-8} "* ]]; then
-        extraflag=""
-        [ "$player" -lt 2 ] || skip=true
-        # yao's -O protocol variant
-        if [ "${protocol::-8}" == yaoO ]; then
-            protocol=yao-party.x
-            extraflag="-O"
-        fi
-        runflags="${runflags//-u/}"
-    fi
+# run the SMC protocol
+/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &> "$log" || success=false
 
-    # run the SMC protocol
-    $skip ||
-        /bin/time -f "$timerf" ./"$protocol" "$runflags" -h 10.10."$network".2 $extraflag -p "$player" \
-            experiment-"$size"-"$partysize"-"$etype" &> "$log" || success=false
+pos_upload --loop "$log"
 
-    pos_upload --loop "$log"
+#abort if no success
+$success
 
-    #abort if no success
-    $success
+pos_sync
 
-    pos_sync
-
-done
 
 ####
 #  environment manipulation reset section start

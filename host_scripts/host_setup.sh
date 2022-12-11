@@ -47,7 +47,10 @@ cp "$REPO2_DIR"/helpers/htoprc ~/.config/htop/
 
 cd "$REPO_DIR"
 
-# use a stable state of the MP-SPDZ repo
-git checkout "$REPO_COMMIT"
+# use a stable state of the MP-Slice repo
+###git checkout "$REPO_COMMIT"
+
+# switch to fork
+git checkout experimental
 
 echo "global setup successful"

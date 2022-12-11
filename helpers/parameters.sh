@@ -4,7 +4,7 @@
 usage() {
     styleCyan "$0: $1"
     echo
-    echo "Options: { -e[xperiment] | -n[odes] | -p[rotocols] | -i[nput] | -c[pu] |"
+    echo "Options: { -n[odes] | -i[nput] | -c[pu] |"
     echo "           -q(--cpuquota) | -f[req] | -r[am] | -l[atency] | -b(andwidth)} |"
     echo "           -d(--packetdrop)"
     echo -e "\nRun '$0 --help' for more information.\n"
@@ -13,23 +13,17 @@ usage() {
     echo -e "\nAvailable NODES:"
 	# xargs replaces '\n' with ' '
 	pos no li | grep -E "$(whoami)|None" | awk '{print $1}' | xargs
-    echo -e "\nAvailable protocols:"
-    echo -e "  Fields (Mod prime / GF(2^n)):\n    ${supportedFieldProtocols[*]}"
-    echo -e "  Rings (Mod 2^k):\n    ${supportedRingProtocols[*]}"
-    echo -e "  Binary (SS & Garbling):\n    ${supportedBinaryProtocols[*]}"
     exit 1
 }
 
 help() {
-	echo "$0 - run SMC experiments with MP-SPDZ protocol and POS testbed environment"
+	echo "$0 - run SMC experiments with MP-Slice protocol in a POS testbed environment"
     echo "Example:  ./$0 -e 31_scalable_search -p shamir,atlas -n valga,tapa,rapla -i 10,20,...,100 -q 20,40,80 -f 1.9,2.6"
     echo
     echo "<Values> supported are of the form <value1>[,<value2>,...] or use \"...\" to specify the range"
     echo "       [...,<valuei>,]<start>,<next>,...,<stop>[,valuek,...], with increment steps <next>-<start>"
     echo -e "\nOptions (mandatory)"
-    echo " -e, --experiment     experiment to run"
     echo " -n, --nodes          nodes to run the experiment on of the form <node1>[,<node2>,...]"
-    echo " -p, --protocols      SMC protocols to use of the form <protocol1>[,<protocol2>,...]"
     echo " -i, --input          input sizes, with <Values>"
     echo -e "\nOptions (optional)"
     echo "     --etype          experiment type, if applicable, specified with a code"
@@ -38,15 +32,6 @@ help() {
     echo "     --runflags       extra flags to run the protocols with"
     echo "     --config         config files run with <path> as parameter, nodes can be given separatly"
     echo "                      allowed form: $0 --config file.conf [nodeA,...]"
-    echo "     --maldishonest   use every supported malicious dishonest protocol"
-    echo "     --codishonest    use every supported covert dishonest protocol"
-    echo "     --semidishonest  use every supported semi dishonest protocol"
-    echo "     --malhonest      use every supported malicious honest protocol"
-    echo "     --semihonest     use every supported semi honest protocol"
-    echo "     --field          use every supported field protocol"
-    echo "     --ring           use every supported ring protocol"
-    echo "     --binary         use every supported binary protocol"
-    echo "     --all            use every supported protocol"
     echo -e "\nManipulate Host Environment (optional)"
     echo " -c, --cpu            cpu thread counts, with <Values>"
     echo " -q, --cpuquota       cpu quotas in % (10 < quota), with <Values>"
@@ -59,12 +44,6 @@ help() {
     echo " -l, --latency        latency of network in ms, with <Values>"
     echo " -b, --bandwidth      bandwidth of network in MBit/s, with <Values>"
     echo " -d, --packetdrop     packet drop/loss in network in %, with <Values>"
-	echo -e "\nAvailable experiments:\n"
-	ls experiments
-    echo -e "\nAvailable protocols:\n"
-    echo -e "  Fields (Mod prime / GF(2^n)):\n    ${supportedFieldProtocols[*]}"
-    echo -e "  Rings (Mod 2^k):\n    ${supportedRingProtocols[*]}"
-    echo -e "  Binary (SS & Garbling):\n    ${supportedBinaryProtocols[*]}"
 	echo -e "\nAvailable NODES:\n"
 	# xargs replaces '\n' with ' '
 	pos no li | grep -E "$(whoami)|None" | awk '{print $1}' | xargs
@@ -96,11 +75,12 @@ compflags=""
 progflags=""
 runflags=""
 NODES=()
+
+# MP slice vars
+DATATYPE=()
 PROTOCOLS=()
-CDOMAINS=()
-FIELDPROTOCOLS=()
-RINGPROTOCOLS=()
-BINARYPROTOCOLS=()
+PREPROCESS=()
+
 INPUTS=()
 CPUS=()
 QUOTAS=()
@@ -129,7 +109,7 @@ setParameters() {
     # define the flags for the parameters
     # ':' means that the flag expects an argument.
     SHORT=e:,n:,p:,i:,m,c:,q:,f:,r:,l:,b:,d:,x,h
-    LONG=experiment:,etype:,compflags:,progflags:,runflags:,nodes:,protocols:,maldishonest,codishonest,semidishonest,malhonest,semihonest,field,ring,binary,all,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help
+    LONG=experiment:,etype:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -164,30 +144,16 @@ setParameters() {
             -p|--protocols) 
                 setArray PROTOCOLS "$2"
                 shift;;
-            --maldishonest)
-                PROTOCOLS+=( "${maldishonestProtocols[@]}" );;
-            --codishonest)
-                PROTOCOLS+=( "${covertdishonestProtocols[@]}" );;
-            --semidishonest)
-                PROTOCOLS+=( "${semidishonestProtocols[@]}" );;
-            --malhonest)
-                PROTOCOLS+=( "${malhonestProtocols[@]}" );;
-            --semihonest)
-                PROTOCOLS+=( "${semihonestProtocols[@]}" );;
-            --field)
-                PROTOCOLS+=( "${supportedFieldProtocols[@]}" );;
-            --ring)
-                PROTOCOLS+=( "${supportedRingProtocols[@]}" );;
-            --binary)
-                PROTOCOLS+=( "${supportedBinaryProtocols[@]}" );;
-            --all)
-                # remove real-bmr for explosive runtime costs, need to specify explicitly
-                PROTOCOLS=( "${supportedFieldProtocols[@]}" "${supportedRingProtocols[@]}" "${supportedBinaryProtocols[@]//real-bmr/}");;
             -i|--input)
                 setArray INPUTS "$2"
                 shift;;
-            -m|--measureram)
-                TTYPES+=( MEASURERAM );;
+            # MP-Slice args
+            --dtype)
+                setArray DATATYPE "$2"
+                shift;;
+            --preproc)
+                setArray PREPROCESS "$2"
+                shift;;
             # Host environment manipulation
             -c|--cpu)
                 TTYPES+=( CPUS )
@@ -231,26 +197,7 @@ setParameters() {
         shift || true      # skip to next option-argument pair
     done
 
-    # valid experiment check
-    if [ -f experiments/"$EXPERIMENT"/parameters.yml ]; then
-        # get experiment node count from experiment parameters file
-        requiredNODES=$(grep node_count experiments/"$EXPERIMENT"/parameters.yml | awk '{print $2}')
-        # check if the value node_count exists
-        [ "$requiredNODES" -lt 1 ] && requiredNODES="-1"
-    else
-        usage "Experiment $EXPERIMENT/parameters.yml not found"
-        exit
-    fi
-
-    # valid arguments check
-    nodecount="${#NODES[*]}"
-    [ "$requiredNODES" -gt "$nodecount" ] &&
-        usage "minimum NODEScount: $requiredNODES   given NODEScount: $nodecount"
-    protocolcount="${#PROTOCOLS[*]}"
-    [ "$protocolcount" -lt 1 ] && 
-        usage "no protocols specified"
-
-     # node already in use check
+    # node already in use check
     nodetasks=$(pgrep -facu "$(id -u)" "${NODES[0]}")
     [ "$nodetasks" -gt 4 ] && error $LINENO "${FUNCNAME[0]}(): it appears host ${NODES[0]} is currently in use"
 
@@ -277,35 +224,16 @@ setParameters() {
         echo "runflags: " >> experiments/"$EXPERIMENT"/parameters.yml
     fi
 
-    # split up protocols to computation domains
-    for protocol in "${PROTOCOLS[@]}"; do
-        if [[ " ${supportedFieldProtocols[*]} " == *" $protocol "* ]]; then
-            # filter duplicats
-            [[ " ${FIELDPROTOCOLS[*]} " == *" $protocol "* ]] || FIELDPROTOCOLS+=( "$protocol" )
-        elif [[ " ${supportedRingProtocols[*]} " == *" $protocol "* ]]; then
-            [[ " ${RINGPROTOCOLS[*]} " == *" $protocol "* ]] || RINGPROTOCOLS+=( "$protocol" )
-        elif [[ " ${supportedBinaryProtocols[*]} " == *" $protocol "* ]]; then
-            [[ " ${BINARYPROTOCOLS[*]} " == *" $protocol "* ]] || BINARYPROTOCOLS+=( "$protocol" )
-        else
-            warning "protocol $protocol was not found, skipping"
-        fi
-    done
-
-    # activate computation domain for later handling
-    [ "${#FIELDPROTOCOLS[*]}" -gt 0 ] && CDOMAINS+=( FIELD )
-    [ "${#RINGPROTOCOLS[*]}" -gt 0 ] && CDOMAINS+=( RING )
-    [ "${#BINARYPROTOCOLS[*]}" -gt 0 ] && CDOMAINS+=( BINARY )
-
-    # append -party.x to all protocols
-    for cdomain in "${CDOMAINS[@]}"; do
-        declare -n protos="${cdomain}PROTOCOLS"
-        protos=( "${protos[@]/%/-party.x}" )
-    done
-    PROTOCOLS=( "${FIELDPROTOCOLS[@]}" "${RINGPROTOCOLS[@]}" "${BINARYPROTOCOLS[@]}" )
-    
     # generate loop-variables.yml (append random num to mitigate conflicts)
-    loopvarpath="experiments/$EXPERIMENT/loop-variables-$NETWORK.yml"
+    loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
+    # Config Vars
+    for type in PROTOCOLS DATATYPE PREPROCESS; do
+        declare -n ttypes="${type}"
+        parameters="${ttypes[*]}"
+        echo "${type,,}: [${parameters// /, }]" >> "$loopvarpath"
+    done
+    # Environment Manipulation Vars
     for type in "${TTYPES[@]}"; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
@@ -328,16 +256,9 @@ setParameters() {
         echo "    Experiment = $EXPERIMENT $ETYPE"
         echo "    Nodes = ${NODES[*]}"
         echo "    Internal network = 10.10.$NETWORK.0/24"
-        echo "    Protocols:"
-        echo "      Field  = ${FIELDPROTOCOLS[*]/-party.x/}"
-        echo "      Ring   = ${RINGPROTOCOLS[*]/-party.x/}"
-        echo "      Binary = ${BINARYPROTOCOLS[*]/-party.x/}"
+        echo "    Protocols: ${PROTOCOLS[*]}"
         echo "    Inputs = ${INPUTS[*]}"
         echo "    Testtypes:"
-        for type in "${TTYPES[@]}"; do
-            declare -n ttypes="${type}"
-            echo -e "      $type\t= ${ttypes[*]}"
-        done
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
 }

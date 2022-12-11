@@ -37,19 +37,17 @@ RUNSTATUS="${Orange}incomplete${Stop}"
 
 source helpers/testresults_helper.sh
 
-for cdomain in "${CDOMAINS[@]}"; do
+echo "running experiment on hosts..."
+PIDS=()
+runExperiment
 
-    echo "running experiment on hosts... (CDomain $cdomain)"
-    PIDS=()
-    runExperiment "$cdomain"
-
-    sleep 2 && echo " ...waiting for experiment"
-    for pid in "${PIDS[@]}"; do
-        # and error on the testnodes can be caught here
-        wait "$pid" || getlastoutput
-    done
-    echo "  done with CDomain $cdomain"
-
+sleep 2 && echo " ...waiting for experiment"
+for pid in "${PIDS[@]}"; do
+    # and error on the testnodes can be caught here
+    wait "$pid" || getlastoutput
 done
+echo "  done"
+
+
 
 RUNSTATUS="${Green}completed${Stop}"
