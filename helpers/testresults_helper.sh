@@ -103,7 +103,7 @@ exportExperimentResults() {
         runtimeinfo=$(find "$resultpath" -name "testresults*$i" -print -quit)
         if [ ! -f "$runtimeinfo" ] || [ ! -f "$runtimeinfo" ]; then
             styleOrange "    Skip - File not found error: testresults*$i"
-            continue 2
+            continue
         fi
 
         ## Minimum result measurement information
