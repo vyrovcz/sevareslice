@@ -35,7 +35,7 @@ initializePOS() {
 		"$POS" alloc set_var "$node" experiment-variables.yml --as-global;
 
 		# loop variables for experiment script (append random num to mitigate conflicts)
-		loopvarpath="experiments/$EXPERIMENT/loop-variables-$NETWORK.yml"
+		loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
 		"$POS" alloc set_var "$node" "$loopvarpath" --as-loop;
 		} || error ${LINENO} " ${FUNCNAME[0]} alloc set_var failed for $node"
 	done
