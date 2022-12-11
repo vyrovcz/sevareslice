@@ -40,6 +40,8 @@ cd "$REPO_DIR"
     # compile experiment
     /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
         -s "$protocol" -e "$preprocess"
+    
+    echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
 } |& tee "$log"
 

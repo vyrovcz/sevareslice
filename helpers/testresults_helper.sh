@@ -56,7 +56,7 @@ verifyExperiment() {
 exportExperimentResults() {
 
     # set up location
-    datatableShort="$EXPORTPATH/data/E${EXPERIMENT::2}_short_results.csv"
+    datatableShort="$EXPORTPATH/data/Eslice_short_results.csv"
 
     mkdir -p "$datatableShort"
     rm -rf "$datatableShort"
@@ -148,26 +148,26 @@ exportExperimentResults() {
     column -s ';' -t "$datatableShort" > "${datatableShort::-3}"tsv
     okfail ok "exported short and full results (${datatableShort::-3}tsv)"
 
-###    # push to measurement data git
-###    repourl=$(grep "repoupload" global-variables.yml | cut -d ':' -f 2-)
-###    # check if upload git does not exist yet
-###    if [ ! -d git-upload/.git ]; then
-###        # clone the upload git repo
-###        # default to trust server fingerprint authenticity (usually insecure)
-###        GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone "${repourl// /}" git-upload
-###    fi
-###
-###    echo " pushing experiment measurement data to git repo$repourl"
-###    cd git-upload || error ${LINENO} "${FUNCNAME[0]} cd into gitrepo failed"
-###    {
-###        # a pull is not really required, but for small sizes it doesn't hurt
-###        git pull
-###        # copy from local folder to git repo folder
-###        [ ! -d "${EXPORTPATH::-12}" ] && mkdir results/"${EXPORTPATH::-12}"
-###        cp -r ../"$EXPORTPATH" "${EXPORTPATH::-12}"
-###        git add . 
-###        git commit -a -m "script upload"
-###        git push 
-###    } &> /dev/null || error ${LINENO} "${FUNCNAME[0]} git upload failed"
-###        okfail ok " upload success" 
+    # push to measurement data git
+    repourl=$(grep "repoupload" global-variables.yml | cut -d ':' -f 2-)
+    # check if upload git does not exist yet
+    if [ ! -d git-upload/.git ]; then
+        # clone the upload git repo
+        # default to trust server fingerprint authenticity (usually insecure)
+        GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone "${repourl// /}" git-upload
+    fi
+
+    echo " pushing experiment measurement data to git repo$repourl"
+    cd git-upload || error ${LINENO} "${FUNCNAME[0]} cd into gitrepo failed"
+    {
+        # a pull is not really required, but for small sizes it doesn't hurt
+        git pull
+        # copy from local folder to git repo folder
+        [ ! -d "${EXPORTPATH::-12}" ] && mkdir resultsMP-Slice/"${EXPORTPATH::-12}"
+        cp -r ../"$EXPORTPATH" "${EXPORTPATH::-12}"
+        git add . 
+        git commit -a -m "script upload"
+        git push 
+    } &> /dev/null || error ${LINENO} "${FUNCNAME[0]} git upload failed"
+        okfail ok " upload success" 
 }
