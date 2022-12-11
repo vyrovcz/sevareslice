@@ -98,14 +98,10 @@ exportExperimentResults() {
         for value in $(jq -r 'values[]' "$loopinfo"); do
             loopvalues+="$value;"
         done
-
-        # the actual number of participants
-        partysize=""
-        setPartySize "$protocol"
         
         # get pos filepath of the measurements for the current loop
-        compileinfo=$(find "$resultpath" -name "measurementlog${cdomain}_run*$i" -print -quit)
-        runtimeinfo=$(find "$resultpath" -name "testresults$cdomain${protocol}_run*$i" -print -quit)
+        compileinfo=$(find "$resultpath" -name "measurementlog_run*$i" -print -quit)
+        runtimeinfo=$(find "$resultpath" -name "testresults$protocol_run*$i" -print -quit)
         if [ ! -f "$runtimeinfo" ] || [ ! -f "$compileinfo" ]; then
             styleOrange "    Skip - File not found error: runtimeinfo or compileinfo"
             continue 2

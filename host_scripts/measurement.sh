@@ -33,7 +33,7 @@ etype=$5
 cd "$REPO_DIR"
 
 {
-    echo "player: $player, protocol: $protocol, types: ${types[*]}"
+    echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess"
 
     # compile experiment
     /bin/time ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
@@ -88,9 +88,9 @@ success=true
 pos_sync --timeout 300
 
 # define ip addresses of the other party members
-[ "$ipaddr" -eq 2 ] && ipA=10.10."$network".3 && ipB=10.10."$network".4
-[ "$ipaddr" -eq 3 ] && ipA=10.10."$network".2 && ipB=10.10."$network".4
-[ "$ipaddr" -eq 4 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
+[ "$player" -eq 0 ] && ipA=10.10."$network".3 && ipB=10.10."$network".4
+[ "$player" -eq 1 ] && ipA=10.10."$network".2 && ipB=10.10."$network".4
+[ "$player" -eq 2 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
 
 # run the SMC protocol
 /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &> "$log" || success=false
