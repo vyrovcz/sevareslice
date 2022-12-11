@@ -83,8 +83,8 @@ exportExperimentResults() {
     done
 
     # generate header line of data dump with column information
-    basicInfo1=""
-    basicInfo2=""
+    basicInfo1="protocol;comp.time(s);comp.peakRAM(MiB);bin.filesize(MiB);"
+    basicInfo2="${dyncolumns}runtime_internal(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
     echo -e "${basicInfo1}${basicInfo2}" > "$datatableShort"
 
     i=0
@@ -114,7 +114,7 @@ exportExperimentResults() {
         compilemaxRAMused=$(grep "Maximum resident" "$compileinfo" | tail -n 1 | cut -d ' ' -f 1)
         binfsize=$(grep "Binary file size" "$compileinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
-        runtimeint=$(grep "Time =" "$runtimeinfo" | awk '{print $3}')
+        runtimeint=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
         runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | cut -d ' ' -f 1)
         maxRAMused=$(grep "Maximum resident" "$runtimeinfo" | cut -d ' ' -f 1)
         [ -n "$maxRAMused" ] && maxRAMused="$((maxRAMused/1024))"
@@ -128,7 +128,7 @@ exportExperimentResults() {
         basicComm="${commRounds:-NA};${dataSent:-NA};${globaldataSent:-NA}"
 
         # put all collected info into one row (Short)
-        basicInfo="${EXPERIMENT::2};$cdomain;$advModel;$protocol;$partysize;${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
+        basicInfo="$protocol;${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
         echo -e "$basicInfo;$loopvalues$runtimeint;$runtimeext;$maxRAMused;$jobCPU;$basicComm" >> "$datatableShort"
 
         # locate next loop file

@@ -29,6 +29,8 @@ network="$3"
 partysize=$4
 # experiment type to allow small differences in experiments
 etype=$5
+log=testresults"$protocol"
+touch "$log"
 
 cd "$REPO_DIR"
 
@@ -36,10 +38,12 @@ cd "$REPO_DIR"
     echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess"
 
     # compile experiment
-    /bin/time ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+    /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
         -s "$protocol" -e "$preprocess"
 
-} |& tee measurementlog"$cdomain"
+} |& tee "$log"
+
+echo -e "\n========\n" >> "$log"
 
 ####
 #  environment manipulation section start
@@ -80,9 +84,6 @@ esac
 #  environment manipulation section stop
 ####
 
-log=testresults"$protocol"
-touch "$log"
-
 success=true
 
 pos_sync --timeout 300
@@ -101,7 +102,6 @@ pos_upload --loop "$log"
 $success
 
 pos_sync
-
 
 ####
 #  environment manipulation reset section start

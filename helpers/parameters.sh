@@ -226,7 +226,7 @@ setParameters() {
     [ "${#RAM[*]}" -gt 0 ] && SWAP=${SWAP:-4096}
 
     # Experiment run summary  information output
-    SUMMARYFILE="$EXPORTPATH/E${EXPERIMENT::2}-run-summary.dat"
+    SUMMARYFILE="$EXPORTPATH/Eslice-run-summary.dat"
     mkdir -p "$SUMMARYFILE" && rm -rf "$SUMMARYFILE"
     {
         echo "  Setup:"
