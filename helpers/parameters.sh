@@ -234,8 +234,10 @@ setParameters() {
         echo "    Nodes = ${NODES[*]}"
         echo "    Internal network = 10.10.$NETWORK.0/24"
         echo "    Protocols: ${PROTOCOLS[*]}"
+        echo "    Datatypes = ${DATATYPE[*]}"
         echo "    Inputs = ${INPUTS[*]}"
-        echo "    Testtypes:"
+        echo "    Preprocessing: ${PREPROCESS[*]}"
+        echo "    Testtypes: ${TTYPES[*]}"
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
 }
