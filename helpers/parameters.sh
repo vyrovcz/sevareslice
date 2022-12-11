@@ -201,29 +201,6 @@ setParameters() {
     nodetasks=$(pgrep -facu "$(id -u)" "${NODES[0]}")
     [ "$nodetasks" -gt 4 ] && error $LINENO "${FUNCNAME[0]}(): it appears host ${NODES[0]} is currently in use"
 
-    # add extra flags to parameters yaml
-    # first, delete old flags
-    sed -i '/compflags/d' experiment-vars/parameters-"$NETWORK".yml
-    if [ -n "$compflags" ]; then
-        echo "compflags: $compflags" >> experiment-vars/parameters-"$NETWORK".yml
-    else
-        echo "compflags: " >> experiment-vars/parameters-"$NETWORK".yml
-    fi
-
-    sed -i '/progflags/d' experiment-vars/parameters-"$NETWORK".yml
-    if [ -n "$progflags" ]; then
-        echo "progflags: $progflags" >> experiment-vars/parameters-"$NETWORK".yml
-    else
-        echo "progflags: " >> experiment-vars/parameters-"$NETWORK".yml
-    fi
-
-    sed -i '/runflags/d' experiment-vars/parameters-"$NETWORK".yml
-    if [ -n "$runflags" ]; then
-        echo "runflags: $runflags" >> experiment-vars/parameters-"$NETWORK".yml
-    else
-        echo "runflags: " >> experiment-vars/parameters-"$NETWORK".yml
-    fi
-
     # generate loop-variables.yml (append random num to mitigate conflicts)
     loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"

@@ -13,8 +13,6 @@ set -x
 REPO_DIR=$(pos_get_variable repo_dir --from-global)
 REPO2_DIR=$(pos_get_variable repo2_dir --from-global)
 source "$REPO2_DIR"/protocols.sh
-EXPERIMENT=$(pos_get_variable experiment --from-global)
-runflags=$(pos_get_variable runflags --from-global)
 size=$(pos_get_variable input_size --from-loop)
 protocol=$(pos_get_variable protocols --from-loop)
 datatype=$(pos_get_variable datatype --from-loop)
