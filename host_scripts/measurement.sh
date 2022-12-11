@@ -19,8 +19,8 @@ datatype=$(pos_get_variable datatype --from-loop)
 preprocess=$(pos_get_variable preprocess --from-loop)
 
 timerf="%M (Maximum resident set size in kbytes)\n\
-        %e (Elapsed wall clock time in seconds)\n\
-        %P (Percent of CPU this job got)"
+%e (Elapsed wall clock time in seconds)\n\
+%P (Percent of CPU this job got)"
 player=$1
 environ=""
 # test types to simulate changing environments like cpu frequency or network latency
@@ -96,8 +96,6 @@ pos_sync --timeout 300
 # run the SMC protocol
 /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &> "$log" || success=false
 
-pos_upload --loop "$log"
-
 #abort if no success
 $success
 
@@ -123,16 +121,8 @@ esac
 #  environment manipulation reset section stop
 ####
 
-# if there are no test types
-if [ "${#types[*]}" -lt 1 ]; then
-    # older binaries won't be needed anymore and can be removed
-    # this is important for a big number of various input sizes
-    # as with many binaries a limited disk space gets consumed fast
-    rm -rf Programs/Bytecode/*
-fi
-
+echo "experiment finished"  >> "$log"
+pos_upload --loop "$log"
+# abort if no success
+$success
 pos_sync --loop
-
-echo "experiment successful"  >> measurementlog"$cdomain"
-
-pos_upload --loop measurementlog"$cdomain"

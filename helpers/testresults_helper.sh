@@ -83,14 +83,14 @@ exportExperimentResults() {
     done
 
     # generate header line of data dump with column information
-    basicInfo1="protocol;comp.time(s);comp.peakRAM(MiB);bin.filesize(MiB);"
+    basicInfo1="comp.time(s);comp.peakRAM(MiB);bin.filesize(MiB);"
     basicInfo2="${dyncolumns}runtime_internal(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
     echo -e "${basicInfo1}${basicInfo2}" > "$datatableShort"
 
     i=0
     # get loopfile path for the current variables
     loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
-    echo "  exporting $protocol"
+    echo "  exporting testresults"
     # while we find a next loop info file do
     while [ -n "$loopinfo" ]; do
         loopvalues=""
@@ -100,19 +100,18 @@ exportExperimentResults() {
         done
         
         # get pos filepath of the measurements for the current loop
-        compileinfo=$(find "$resultpath" -name "measurementlog_run*$i" -print -quit)
         runtimeinfo=$(find "$resultpath" -name "testresults$protocol_run*$i" -print -quit)
-        if [ ! -f "$runtimeinfo" ] || [ ! -f "$compileinfo" ]; then
-            styleOrange "    Skip - File not found error: runtimeinfo or compileinfo"
+        if [ ! -f "$runtimeinfo" ] || [ ! -f "$runtimeinfo" ]; then
+            styleOrange "    Skip - File not found error: testresults$protocol_run*$i"
             continue 2
         fi
 
         ## Minimum result measurement information
         ######
         # extract measurement
-        compiletime=$(grep "Elapsed wall clock" "$compileinfo" | tail -n 1 | cut -d ' ' -f 1)
-        compilemaxRAMused=$(grep "Maximum resident" "$compileinfo" | tail -n 1 | cut -d ' ' -f 1)
-        binfsize=$(grep "Binary file size" "$compileinfo" | tail -n 1 | cut -d ' ' -f 1)
+        compiletime=$(grep "Elapsed wall clock" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
+        compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
+        binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
         runtimeint=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
         runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | cut -d ' ' -f 1)
@@ -128,8 +127,8 @@ exportExperimentResults() {
         basicComm="${commRounds:-NA};${dataSent:-NA};${globaldataSent:-NA}"
 
         # put all collected info into one row (Short)
-        basicInfo="$protocol;${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
-        echo -e "$basicInfo;$loopvalues$runtimeint;$runtimeext;$maxRAMused;$jobCPU;$basicComm" >> "$datatableShort"
+        basicInfo="${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
+        echo -e "$basicInfo;$loopvalues$runtimeint;$runtimeext;$maxRAMused;$jobCPU" >> "$datatableShort"
 
         # locate next loop file
         ((++i))
@@ -147,7 +146,6 @@ exportExperimentResults() {
     # create a tab separated table for pretty formating
     # convert .csv -> .tsv
     column -s ';' -t "$datatableShort" > "${datatableShort::-3}"tsv
-    column -s ';' -t "$datatableFull" > "${datatableFull::-3}"tsv
     okfail ok "exported short and full results (${datatableShort::-3}tsv)"
 
 ###    # push to measurement data git
