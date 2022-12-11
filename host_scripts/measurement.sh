@@ -29,8 +29,7 @@ network="$3"
 partysize=$4
 # experiment type to allow small differences in experiments
 etype=$5
-log=testresults"$protocol"
-touch "$log"
+touch testresults
 
 cd "$REPO_DIR"
 
@@ -43,9 +42,9 @@ cd "$REPO_DIR"
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
-} |& tee "$log"
+} |& tee testresults
 
-echo -e "\n========\n" >> "$log"
+echo -e "\n========\n" >> testresults
 
 ####
 #  environment manipulation section start
@@ -96,7 +95,7 @@ pos_sync --timeout 300
 [ "$player" -eq 2 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
 
 # run the SMC protocol
-/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> "$log" || success=false
+/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
 
 #abort if no success
 $success
@@ -123,8 +122,8 @@ esac
 #  environment manipulation reset section stop
 ####
 
-echo "experiment finished"  >> "$log"
-pos_upload --loop "$log"
+echo "experiment finished"  >> testresults
+pos_upload --loop testresults
 # abort if no success
 $success
 pos_sync --loop

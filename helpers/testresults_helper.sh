@@ -109,8 +109,8 @@ exportExperimentResults() {
         ## Minimum result measurement information
         ######
         # extract measurement
-        compiletime=$(grep "Elapsed wall clock" "$runtimeinfo" | head -n 1 | cut -d ' ' -f 1)
-        compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | head -n 1 | cut -d ' ' -f 1)
+        compiletime=$(grep "Elapsed wall clock" "$runtimeinfo" | head -n 2 | tail -n 1 | cut -d ' ' -f 1)
+        compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | head -n 2 | tail -n 1 | cut -d ' ' -f 1)
         binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
         runtimeint=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
