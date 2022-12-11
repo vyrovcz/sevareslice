@@ -58,7 +58,7 @@ setArray() { # load array $1 reference with ,-seperated values in $2
 
 TEMPFILES=()
 ALLOC_ID=""
-EXPORTPATH="results/$(date +20%y-%m)/$(date +%d_%H-%M-%S)"
+EXPORTPATH="resultsMP-Slice/$(date +20%y-%m)/$(date +%d_%H-%M-%S)"
 # pos_upload resultspath
 RPATH=""
 SUMMARYFILE=""
