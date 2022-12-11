@@ -203,25 +203,25 @@ setParameters() {
 
     # add extra flags to parameters yaml
     # first, delete old flags
-    sed -i '/compflags/d' experiments/"$EXPERIMENT"/parameters.yml
+    sed -i '/compflags/d' experiment-vars/parameters-"$NETWORK".yml
     if [ -n "$compflags" ]; then
-        echo "compflags: $compflags" >> experiments/"$EXPERIMENT"/parameters.yml
+        echo "compflags: $compflags" >> experiment-vars/parameters-"$NETWORK".yml
     else
-        echo "compflags: " >> experiments/"$EXPERIMENT"/parameters.yml
+        echo "compflags: " >> experiment-vars/parameters-"$NETWORK".yml
     fi
 
-    sed -i '/progflags/d' experiments/"$EXPERIMENT"/parameters.yml
+    sed -i '/progflags/d' experiment-vars/parameters-"$NETWORK".yml
     if [ -n "$progflags" ]; then
-        echo "progflags: $progflags" >> experiments/"$EXPERIMENT"/parameters.yml
+        echo "progflags: $progflags" >> experiment-vars/parameters-"$NETWORK".yml
     else
-        echo "progflags: " >> experiments/"$EXPERIMENT"/parameters.yml
+        echo "progflags: " >> experiment-vars/parameters-"$NETWORK".yml
     fi
 
-    sed -i '/runflags/d' experiments/"$EXPERIMENT"/parameters.yml
+    sed -i '/runflags/d' experiment-vars/parameters-"$NETWORK".yml
     if [ -n "$runflags" ]; then
-        echo "runflags: $runflags" >> experiments/"$EXPERIMENT"/parameters.yml
+        echo "runflags: $runflags" >> experiment-vars/parameters-"$NETWORK".yml
     else
-        echo "runflags: " >> experiments/"$EXPERIMENT"/parameters.yml
+        echo "runflags: " >> experiment-vars/parameters-"$NETWORK".yml
     fi
 
     # generate loop-variables.yml (append random num to mitigate conflicts)
