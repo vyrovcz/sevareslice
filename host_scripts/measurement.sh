@@ -96,7 +96,7 @@ pos_sync --timeout 300
 [ "$player" -eq 2 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
 
 # run the SMC protocol
-/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &> "$log" || success=false
+/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> "$log" || success=false
 
 #abort if no success
 $success

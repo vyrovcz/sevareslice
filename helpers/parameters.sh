@@ -78,7 +78,7 @@ NODES=()
 
 # MP slice vars
 DATATYPE=()
-PROTOCOLS=()
+PROTOCOL=()
 PREPROCESS=()
 
 INPUTS=()
@@ -142,7 +142,7 @@ setParameters() {
                 setArray NODES "$2"
                 shift;;
             -p|--protocols) 
-                setArray PROTOCOLS "$2"
+                setArray PROTOCOL "$2"
                 shift;;
             -i|--input)
                 setArray INPUTS "$2"
@@ -205,7 +205,7 @@ setParameters() {
     loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
     # Config Vars
-    for type in PROTOCOLS DATATYPE PREPROCESS; do
+    for type in PROTOCOL DATATYPE PREPROCESS; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
         echo "${type,,}: [${parameters// /, }]" >> "$loopvarpath"
@@ -233,7 +233,7 @@ setParameters() {
         echo "    Experiment = $EXPERIMENT $ETYPE"
         echo "    Nodes = ${NODES[*]}"
         echo "    Internal network = 10.10.$NETWORK.0/24"
-        echo "    Protocols: ${PROTOCOLS[*]}"
+        echo "    Protocols: ${PROTOCOL[*]}"
         echo "    Datatypes = ${DATATYPE[*]}"
         echo "    Inputs = ${INPUTS[*]}"
         echo "    Preprocessing: ${PREPROCESS[*]}"

@@ -14,7 +14,7 @@ verifyExperiment() {
     done < <(find "$RPATH/${NODES[1]}/" -name "testresultsBINARYyaoO*" -print)
 
     for cdomain in "${CDOMAINS[@]}"; do
-        declare -n cdProtocols="${cdomain}PROTOCOLS"
+        declare -n cdProtocols="${cdomain}PROTOCOL"
         for protocol in "${cdProtocols[@]}"; do
             protocol=${protocol::-8}
             
@@ -100,22 +100,22 @@ exportExperimentResults() {
         done
         
         # get pos filepath of the measurements for the current loop
-        runtimeinfo=$(find "$resultpath" -name "testresults$protocol_run*$i" -print -quit)
+        runtimeinfo=$(find "$resultpath" -name "testresults*$i" -print -quit)
         if [ ! -f "$runtimeinfo" ] || [ ! -f "$runtimeinfo" ]; then
-            styleOrange "    Skip - File not found error: testresults$protocol_run*$i"
+            styleOrange "    Skip - File not found error: testresults*$i"
             continue 2
         fi
 
         ## Minimum result measurement information
         ######
         # extract measurement
-        compiletime=$(grep "Elapsed wall clock" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
-        compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
+        compiletime=$(grep "Elapsed wall clock" "$runtimeinfo" | head -n 1 | cut -d ' ' -f 1)
+        compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | head -n 1 | cut -d ' ' -f 1)
         binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
         runtimeint=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
-        runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | cut -d ' ' -f 1)
-        maxRAMused=$(grep "Maximum resident" "$runtimeinfo" | cut -d ' ' -f 1)
+        runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
+        maxRAMused=$(grep "Maximum resident" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$maxRAMused" ] && maxRAMused="$((maxRAMused/1024))"
         jobCPU=$(grep "CPU this job" "$runtimeinfo" | cut -d '%' -f 1)
         maxRAMused=${maxRAMused:-NA}
