@@ -7,47 +7,31 @@ resultpath="$RPATH/${NODES[0]}/"
 # verify testresults
 verifyExperiment() {
 
-    # handle yao -O protocol variant, for some reason the result is only at node[1]
-    # move to resultpath location
-    while IFS= read -r file; do
-        mv "$file" "$resultpath"
-    done < <(find "$RPATH/${NODES[1]}/" -name "testresultsBINARYyaoO*" -print)
+    i=0
+    loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
+    # while we find a next loop info file do
+    while [ -n "$loopinfo" ]; do
 
-    for cdomain in "${CDOMAINS[@]}"; do
-        declare -n cdProtocols="${cdomain}PROTOCOL"
-        for protocol in "${cdProtocols[@]}"; do
-            protocol=${protocol::-8}
-            
-            i=0
-            loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
-            # while we find a next loop info file do
-            while [ -n "$loopinfo" ]; do
+        # get pos filepath of the measurements for the current loop
+        experimentresult=$(find "$resultpath" -name "testresults_run*$i" -print -quit)
 
-                # get pos filepath of the measurements for the current loop
-                experimentresult=$(find "$resultpath" -name "testresults$cdomain${protocol}_run*$i" -print -quit)
-                verificationresult=$(find "$resultpath" -name "measurementlog${cdomain}_run*$i" -print -quit)
-
-                # check existance of files
-                if [ ! -f "$experimentresult" ] || [ ! -f "$verificationresult" ]; then
-                    styleOrange "  Skip $protocol - File not found error: $experimentresult"
-                    continue 2
-                fi
-
-                # verify experiment result - call experiment specific verify script
-                chmod +x experiments/"$EXPERIMENT"/verify.py
-                match=$(experiments/"$EXPERIMENT"/verify.py "$experimentresult" "$verificationresult")
-                if [ "$match" != 1 ]; then
-                    styleOrange "  Skip $protocol - $match at $experimentresult";
-                    continue 2;
-                fi
-                ((++i))
-                loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
-            done
-
-            # only pass if while-loop actually entered
-            [ "$i" -gt 0 ] && okfail ok "  verified - test passed for $protocol"
-        done
+        # check existance of files
+        if [ ! -f "$experimentresult" ]; then
+            styleOrange "  Skip $protocol - File not found error: $experimentresult"
+        else
+            # verify experiment result - call experiment specific verify script
+            result=$(grep -c "00000001" "$experimentresult")
+            if [ "$result" != 1 ]; then
+                styleOrange "  Skip $protocol - $match at $experimentresult";
+            fi
+        fi
+        ((++i))
+        loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
     done
+
+    # only pass if while-loop actually entered
+    [ "$i" -gt 0 ] && okfail ok "  verified - test passed for $protocol"
+
 }
 
 ############
@@ -84,7 +68,7 @@ exportExperimentResults() {
 
     # generate header line of data dump with column information
     basicInfo1="comp.time(s);comp.peakRAM(MiB);bin.filesize(MiB);"
-    basicInfo2="${dyncolumns}runtime_internal(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
+    basicInfo2="${dyncolumns}inittime(s);runtime_clock(s);runtime_getTime(s);runtime_chrono(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
     echo -e "${basicInfo1}${basicInfo2}" > "$datatableShort"
 
     i=0
@@ -114,7 +98,10 @@ exportExperimentResults() {
         compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | head -n 2 | tail -n 1 | cut -d ' ' -f 1)
         binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
-        runtimeint=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
+        inittime=$(grep "measured to initialize program" "$runtimeinfo" | awk '{print $6}')
+        runtimeclock=$(grep "computation clock" "$runtimeinfo" | awk '{print $7}')
+        runtimegetTime=$(grep "computation getTime" "$runtimeinfo" | awk '{print $7}')
+        runtimechrono=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
         runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         maxRAMused=$(grep "Maximum resident" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$maxRAMused" ] && maxRAMused="$((maxRAMused/1024))"
@@ -129,7 +116,7 @@ exportExperimentResults() {
 
         # put all collected info into one row (Short)
         basicInfo="${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
-        echo -e "$basicInfo;$loopvalues$runtimeint;$runtimeext;$maxRAMused;$jobCPU" >> "$datatableShort"
+        echo -e "$basicInfo;$loopvalues$inittime;$runtimeclock;$runtimegetTime;$runtimechrono;$runtimeext;$maxRAMused;$jobCPU" >> "$datatableShort"
 
         # locate next loop file
         ((++i))
