@@ -22,7 +22,7 @@ verifyExperiment() {
             # verify experiment result - call experiment specific verify script
             result=$(grep -c "00000001" "$experimentresult")
             if [ "$result" != 1 ]; then
-                styleOrange "  Skip $protocol - $match at $experimentresult";
+                styleOrange "    Error $protocol - 00000001 not found in $experimentresult";
             fi
         fi
         ((++i))
@@ -30,7 +30,7 @@ verifyExperiment() {
     done
 
     # only pass if while-loop actually entered
-    [ "$i" -gt 0 ] && okfail ok "  verified - test passed for $protocol"
+    [ "$i" -gt 0 ] && okfail ok "  done - test finished for $protocol"
 
 }
 
@@ -88,6 +88,7 @@ exportExperimentResults() {
         if [ ! -f "$runtimeinfo" ]; then
             styleOrange "    Skip - File not found error: testresults*$i"
             ((++i))
+            loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
             continue
         fi
 
