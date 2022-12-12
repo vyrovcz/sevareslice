@@ -101,8 +101,9 @@ exportExperimentResults() {
         
         # get pos filepath of the measurements for the current loop
         runtimeinfo=$(find "$resultpath" -name "testresults*$i" -print -quit)
-        if [ ! -f "$runtimeinfo" ] || [ ! -f "$runtimeinfo" ]; then
+        if [ ! -f "$runtimeinfo" ]; then
             styleOrange "    Skip - File not found error: testresults*$i"
+            ((++i))
             continue
         fi
 
