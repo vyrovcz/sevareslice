@@ -106,9 +106,9 @@ exportExperimentResults() {
         binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
         inittime=$(grep "measured to initialize program" "$runtimeinfo" | awk '{print $6}')
-        runtimeclock=$(grep "computation clock" "$runtimeinfo" | awk '{print $7}')
-        runtimegetTime=$(grep "computation getTime" "$runtimeinfo" | awk '{print $7}')
-        runtimechrono=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}')
+        runtimeclock=$(grep "computation clock" "$runtimeinfo" | awk '{print $7}' | tail -n 1)
+        runtimegetTime=$(grep "computation getTime" "$runtimeinfo" | awk '{print $7}' | tail -n 1)
+        runtimechrono=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}' | tail -n 1)
         runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         maxRAMused=$(grep "Maximum resident" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$maxRAMused" ] && maxRAMused="$((maxRAMused/1024))"
@@ -123,7 +123,7 @@ exportExperimentResults() {
 
         # put all collected info into one row (Short)
         basicInfo="${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
-        echo -e "$basicInfo;$loopvalues${inittime::-1};${runtimeclock::-1};${runtimegetTime::-1};${runtimechrono::-1};$runtimeext;$maxRAMused;$jobCPU" >> "$datatableShort"
+        echo -e "$basicInfo;$loopvalues${inittime::-1};${runtimeclock::-1};${runtimegetTime::-1};${runtimechrono::-1};${runtimeext:-NA};$maxRAMused;$jobCPU" >> "$datatableShort"
 
         # locate next loop file
         ((++i))

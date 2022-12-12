@@ -103,7 +103,27 @@ pos_sync --timeout 300
 if [ "$splitroles" == 0 ]; then
     /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
 else
-    ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+    #doesn't work with /bin/time
+    #/bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+    #./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+
+    echo "./Scripts/split-roles.sh -p \"$1\" -a \"$2\" -b \"$3\"" > run.sh
+    /bin/time -f "$timerf" bash run.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+    
+    # calculate mean of 6 numbers
+    sum=$(grep "computation clock" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
+    average=$(echo "scale=6;$sum / 6" | bc -l)
+    echo "Time measured to perform computation chrono: ${average}s"
+
+    sum=$(grep "computation getTime" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
+    average=$(echo "scale=6;$sum / 6" | bc -l)
+    echo "Time measured to perform computation chrono: ${average}s"
+
+    sum=$(grep "computation chrono" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
+    average=$(echo "scale=6;$sum / 6" | bc -l)
+    echo "Time measured to perform computation chrono: ${average}s"
+
+
 fi
 
 pos_sync
