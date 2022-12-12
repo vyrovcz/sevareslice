@@ -17,6 +17,7 @@ size=$(pos_get_variable input_size --from-loop)
 protocol=$(pos_get_variable protocol --from-loop)
 datatype=$(pos_get_variable datatype --from-loop)
 preprocess=$(pos_get_variable preprocess --from-loop)
+splitroles=$(pos_get_variable splitroles --from-loop)
 
 timerf="%M (Maximum resident set size in kbytes)\n\
 %e (Elapsed wall clock time in seconds)\n\
@@ -36,9 +37,11 @@ cd "$REPO_DIR"
 {
     echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess"
 
-   # compile experiment
-   /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-       -s "$protocol" -e "$preprocess"
+    #if [ "$splitroles" == 0 ]; then
+        # compile experiment
+        /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+            -s "$protocol" -e "$preprocess"
+    #fi
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
@@ -95,8 +98,11 @@ pos_sync --timeout 300
 [ "$player" -eq 2 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
 
 # run the SMC protocol
-###/bin/time -f "$timerf" ./split-roles.sh -p "$player" -a "$ipA" -b  "$ipB" -d "$datatype" -e "$preprocess" &>> testresults || success=false
-/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
+if [ "$splitroles" == 0 ]; then
+    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
+else
+    /bin/time -f "$timerf" ./split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+fi
 
 #abort if no success
 $success
