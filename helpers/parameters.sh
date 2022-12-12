@@ -209,7 +209,7 @@ setParameters() {
     loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
     # Config Vars
-    for type in PROTOCOL DATATYPE PREPROCESS; do
+    for type in SPLITROLES PROTOCOL PREPROCESS DATATYPE; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
         echo "${type,,}: [${parameters// /, }]" >> "$loopvarpath"
