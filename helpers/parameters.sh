@@ -213,7 +213,7 @@ setParameters() {
     loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
     # Config Vars
-    for type in SPLITROLES PROTOCOL PREPROCESS DATATYPE; do
+    for type in PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
         echo "${type,,}: [${parameters// /, }]" >> "$loopvarpath"
@@ -246,7 +246,8 @@ setParameters() {
         echo "    Inputs = ${INPUTS[*]}"
         echo "    Preprocessing: ${PREPROCESS[*]}"
         echo "    SplitRoles: ${SPLITROLES[*]}"
-        echo "    Testtypes: ${TTYPES[*]}"
+        echo "    SplitRoles: ${SPLITROLES[*]}"
+        echo "    Pack Bool: ${PACKBOOL[*]}"
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
 }
