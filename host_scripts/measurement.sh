@@ -18,6 +18,7 @@ protocol=$(pos_get_variable protocol --from-loop)
 datatype=$(pos_get_variable datatype --from-loop)
 preprocess=$(pos_get_variable preprocess --from-loop)
 splitroles=$(pos_get_variable splitroles --from-loop)
+packbool=$(pos_get_variable packbool --from-loop)
 
 timerf="%M (Maximum resident set size in kbytes)\n\
 %e (Elapsed wall clock time in seconds)\n\
@@ -40,7 +41,7 @@ cd "$REPO_DIR"
     #if [ "$splitroles" == 0 ]; then
         # compile experiment
         /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess"
+            -s "$protocol" -e "$preprocess" -c "$packbool"
     #fi
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"

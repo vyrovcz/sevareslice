@@ -81,6 +81,7 @@ DATATYPE=( 8 )
 PROTOCOL=( 2 )
 PREPROCESS=( 0 )
 SPLITROLES=( 0 )
+PACKBOOL=( 0 )
 
 INPUTS=( 4096 )
 CPUS=()
@@ -110,7 +111,7 @@ setParameters() {
     # define the flags for the parameters
     # ':' means that the flag expects an argument.
     SHORT=e:,n:,p:,i:,m,c:,q:,f:,r:,l:,b:,d:,x,h
-    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,
+    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,packbool:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -157,6 +158,9 @@ setParameters() {
                 shift;;
             --split)
                 setArray SPLITROLES "$2"
+                shift;;
+            --packbool)
+                setArray PACKBOOL "$2"
                 shift;;
             # Host environment manipulation
             -c|--cpu)
