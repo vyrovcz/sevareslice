@@ -36,9 +36,9 @@ cd "$REPO_DIR"
 {
     echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess"
 
-###   # compile experiment
-###   /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-###       -s "$protocol" -e "$preprocess"
+   # compile experiment
+   /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+       -s "$protocol" -e "$preprocess"
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
@@ -95,7 +95,8 @@ pos_sync --timeout 300
 [ "$player" -eq 2 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
 
 # run the SMC protocol
-/bin/time -f "$timerf" ./split-roles.sh -p "$player" -a "$ipA" -b  "$ipB" -d "$datatype" -e "$preprocess" &>> testresults || success=false
+###/bin/time -f "$timerf" ./split-roles.sh -p "$player" -a "$ipA" -b  "$ipB" -d "$datatype" -e "$preprocess" &>> testresults || success=false
+/bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
 
 #abort if no success
 $success
