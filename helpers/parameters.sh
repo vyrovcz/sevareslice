@@ -82,6 +82,8 @@ PROTOCOL=( 2 )
 PREPROCESS=( 0 )
 SPLITROLES=( 0 )
 PACKBOOL=( 0 )
+OPTSHARE=( 1 )
+
 
 INPUTS=( 4096 )
 CPUS=()
@@ -111,7 +113,7 @@ setParameters() {
     # define the flags for the parameters
     # ':' means that the flag expects an argument.
     SHORT=e:,n:,p:,i:,m,c:,q:,f:,r:,l:,b:,d:,x,h
-    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,packbool:
+    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,packbool:,optshare:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -161,6 +163,9 @@ setParameters() {
                 shift;;
             --packbool)
                 setArray PACKBOOL "$2"
+                shift;;
+            --optshare)
+                setArray OPTSHARE "$2"
                 shift;;
             # Host environment manipulation
             -c|--cpu)
@@ -213,7 +218,7 @@ setParameters() {
     loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
     # Config Vars
-    for type in PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE; do
+    for type in OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
         echo "${type,,}: [${parameters// /, }]" >> "$loopvarpath"
@@ -247,6 +252,7 @@ setParameters() {
         echo "    Preprocessing: ${PREPROCESS[*]}"
         echo "    SplitRoles: ${SPLITROLES[*]}"
         echo "    Pack Bool: ${PACKBOOL[*]}"
+        echo "    Optimized Sharing: ${OPTSHARE[*]}"
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
 }
