@@ -103,7 +103,7 @@ pos_sync --timeout 300
 if [ "$splitroles" == 0 ]; then
     /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
 else
-    /bin/time -f "$timerf" ./split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+    /bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
 fi
 
 #abort if no success
