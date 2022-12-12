@@ -22,7 +22,7 @@ verifyExperiment() {
         else
             # verify experiment result - call experiment specific verify script
             result=$(grep -c "00000001" "$experimentresult")
-            if [ "$result" != 1 ]; then
+            if [ "$result" == 0 ]; then
                 styleOrange "    Error $protocol - 00000001 not found in $experimentresult"
                 ((++failcount))
             fi
