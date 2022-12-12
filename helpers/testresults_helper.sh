@@ -123,7 +123,7 @@ exportExperimentResults() {
 
         # put all collected info into one row (Short)
         basicInfo="${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
-        echo -e "$basicInfo;$loopvalues$inittime;$runtimeclock;$runtimegetTime;$runtimechrono;$runtimeext;$maxRAMused;$jobCPU" >> "$datatableShort"
+        echo -e "$basicInfo;$loopvalues${inittime::-1};${runtimeclock::-1};${runtimegetTime::-1};${runtimechrono::-1};$runtimeext;$maxRAMused;$jobCPU" >> "$datatableShort"
 
         # locate next loop file
         ((++i))
