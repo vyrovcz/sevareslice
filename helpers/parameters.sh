@@ -241,6 +241,7 @@ setParameters() {
         echo "    Datatypes = ${DATATYPE[*]}"
         echo "    Inputs = ${INPUTS[*]}"
         echo "    Preprocessing: ${PREPROCESS[*]}"
+        echo "    SplitRoles: ${SPLITROLES[*]}"
         echo "    Testtypes: ${TTYPES[*]}"
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
