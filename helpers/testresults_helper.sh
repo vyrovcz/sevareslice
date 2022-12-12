@@ -8,6 +8,7 @@ resultpath="$RPATH/${NODES[0]}/"
 verifyExperiment() {
 
     i=0
+    failcount=0
     loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
     # while we find a next loop info file do
     while [ -n "$loopinfo" ]; do
@@ -22,15 +23,20 @@ verifyExperiment() {
             # verify experiment result - call experiment specific verify script
             result=$(grep -c "00000001" "$experimentresult")
             if [ "$result" != 1 ]; then
-                styleOrange "    Error $protocol - 00000001 not found in $experimentresult";
+                styleOrange "    Error $protocol - 00000001 not found in $experimentresult"
+                ((++failcount))
             fi
+        fi
+        if [ "$failcount" -gt 10 ]; then
+            okfail fail "  stopping verification after 10 Errors"
+            return
         fi
         ((++i))
         loopinfo=$(find "$resultpath" -name "*$i.loop*" -print -quit)
     done
 
     # only pass if while-loop actually entered
-    [ "$i" -gt 0 ] && okfail ok "  done - test finished for $protocol"
+    [ "$i" -gt 0 ] && okfail ok "  done - test finished"
 
 }
 
