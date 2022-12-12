@@ -246,7 +246,6 @@ setParameters() {
         echo "    Inputs = ${INPUTS[*]}"
         echo "    Preprocessing: ${PREPROCESS[*]}"
         echo "    SplitRoles: ${SPLITROLES[*]}"
-        echo "    SplitRoles: ${SPLITROLES[*]}"
         echo "    Pack Bool: ${PACKBOOL[*]}"
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
