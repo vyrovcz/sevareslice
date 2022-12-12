@@ -106,9 +106,6 @@ else
     /bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
 fi
 
-#abort if no success
-$success
-
 pos_sync
 
 ####
