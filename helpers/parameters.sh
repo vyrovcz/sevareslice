@@ -253,6 +253,11 @@ setParameters() {
         echo "    SplitRoles: ${SPLITROLES[*]}"
         echo "    Pack Bool: ${PACKBOOL[*]}"
         echo "    Optimized Sharing: ${OPTSHARE[*]}"
+        echo "    Testtypes:"
+        for type in "${TTYPES[@]}"; do
+            declare -n ttypes="${type}"
+            echo -e "      $type\t= ${ttypes[*]}"
+        done
         echo "  Summary file = $SUMMARYFILE"
     } | tee "$SUMMARYFILE"
 }
