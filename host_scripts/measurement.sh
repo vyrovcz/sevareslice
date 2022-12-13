@@ -114,7 +114,7 @@ else
     ###/bin/time -f "$timerf" bash run.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     
     # calculate mean of 6 numbers
-    sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
+    sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
     average=$(echo "scale=6;$sum / 6" | bc -l)
     echo "Time measured to initialize program: ${average}s" &>> testresults
 
