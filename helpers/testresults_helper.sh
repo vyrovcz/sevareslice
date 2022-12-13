@@ -74,7 +74,7 @@ exportExperimentResults() {
 
     # generate header line of data dump with column information
     basicInfo1="comp.time(s);comp.peakRAM(MiB);bin.filesize(MiB);"
-    basicInfo2="${dyncolumns}inittime(s);preprocess_chrono(s);runtime_clock(s);runtime_getTime(s);runtime_chrono(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
+    basicInfo2="${dyncolumns}inittime(s);preproc(s);runtime_clock(s);runtime_getTime(s);runtime_chrono(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
     echo -e "${basicInfo1}${basicInfo2}" > "$datatableShort"
 
     i=0
