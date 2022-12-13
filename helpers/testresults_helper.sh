@@ -106,8 +106,9 @@ exportExperimentResults() {
         binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
         inittime=$(grep "measured to initialize program" "$runtimeinfo" | tail -n 1 | awk '{print $6}')
+        inittime=${inittime:-NAs}
         preproctime=$(grep "preprocessing chrono" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
-        preproctime=${preproctime:-NA}
+        preproctime=${preproctime:-NAs}
         runtimeclock=$(grep "computation clock" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
         runtimegetTime=$(grep "computation getTime" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
         runtimechrono=$(grep "computation chrono" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
