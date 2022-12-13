@@ -107,6 +107,9 @@ else
     #/bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
 
+    # wait until finished, the runs quits earlier
+    sleep 2s
+
     ###echo "./Scripts/split-roles.sh -p \"$1\" -a \"$2\" -b \"$3\"" > run.sh
     ###/bin/time -f "$timerf" bash run.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     
