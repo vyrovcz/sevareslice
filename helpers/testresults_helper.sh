@@ -74,7 +74,7 @@ exportExperimentResults() {
 
     # generate header line of data dump with column information
     basicInfo1="comp.time(s);comp.peakRAM(MiB);bin.filesize(MiB);"
-    basicInfo2="${dyncolumns}inittime(s);runtime_clock(s);runtime_getTime(s);runtime_chrono(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
+    basicInfo2="${dyncolumns}inittime(s);preprocess_chrono(s);runtime_clock(s);runtime_getTime(s);runtime_chrono(s);runtime_external(s);peakRAM(MiB);jobCPU(%)"
     echo -e "${basicInfo1}${basicInfo2}" > "$datatableShort"
 
     i=0
@@ -105,10 +105,12 @@ exportExperimentResults() {
         compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | head -n 2 | tail -n 1 | cut -d ' ' -f 1)
         binfsize=$(grep "Binary file size" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$compilemaxRAMused" ] && compilemaxRAMused="$((compilemaxRAMused/1024))"
-        inittime=$(grep "measured to initialize program" "$runtimeinfo" | awk '{print $6}')
-        runtimeclock=$(grep "computation clock" "$runtimeinfo" | awk '{print $7}' | tail -n 1)
-        runtimegetTime=$(grep "computation getTime" "$runtimeinfo" | awk '{print $7}' | tail -n 1)
-        runtimechrono=$(grep "computation chrono" "$runtimeinfo" | awk '{print $7}' | tail -n 1)
+        inittime=$(grep "measured to initialize program" "$runtimeinfo" | tail -n 1 | awk '{print $6}')
+        preproctime=$(grep "preprocessing chrono" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
+        preproctime=${preproctime:-NA}
+        runtimeclock=$(grep "computation clock" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
+        runtimegetTime=$(grep "computation getTime" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
+        runtimechrono=$(grep "computation chrono" "$runtimeinfo" | tail -n 1 | awk '{print $7}')
         runtimeext=$(grep "Elapsed wall clock" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         maxRAMused=$(grep "Maximum resident" "$runtimeinfo" | tail -n 1 | cut -d ' ' -f 1)
         [ -n "$maxRAMused" ] && maxRAMused="$((maxRAMused/1024))"
@@ -123,7 +125,7 @@ exportExperimentResults() {
 
         # put all collected info into one row (Short)
         basicInfo="${compiletime:-NA};$compilemaxRAMused;${binfsize:-NA}"
-        echo -e "$basicInfo;$loopvalues${inittime::-1};${runtimeclock::-1};${runtimegetTime::-1};${runtimechrono::-1};${runtimeext:-NA};$maxRAMused;$jobCPU" >> "$datatableShort"
+        echo -e "$basicInfo;$loopvalues${inittime::-1};${preproctime::-1};${runtimeclock::-1};${runtimegetTime::-1};${runtimechrono::-1};${runtimeext:-NA};$maxRAMused;$jobCPU" >> "$datatableShort"
 
         # locate next loop file
         ((++i))
