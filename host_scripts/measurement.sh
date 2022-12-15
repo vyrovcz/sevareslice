@@ -115,19 +115,19 @@ else
     
     # calculate mean of 6 numbers
     sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 6" | bc -l)
+    average=$(echo "scale=6;$sum / 36" | bc -l)
     echo "Time measured to initialize program: ${average}s" &>> testresults
 
     sum=$(grep "computation clock" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 6" | bc -l)
+    average=$(echo "scale=6;$sum / 36" | bc -l)
     echo "Time measured to perform computation clock: ${average}s" &>> testresults
 
     sum=$(grep "computation getTime" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 6" | bc -l)
+    average=$(echo "scale=6;$sum / 36" | bc -l)
     echo "Time measured to perform computation getTime: ${average}s" &>> testresults
 
     sum=$(grep "computation chrono" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 6" | bc -l)
+    average=$(echo "scale=6;$sum / 36" | bc -l)
     echo "Time measured to perform computation chrono: ${average}s" &>> testresults
 
 
