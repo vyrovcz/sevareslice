@@ -33,6 +33,31 @@ valgaNIC1: ens5f1
 valgaNIC0: ens5f0
 raplaNIC1: enp130s0f0
 
+## testbedCoinbase NIC configuration
+# 25G
+meldNIC0: ens7f1
+tinymanNIC1: ens7f1
+tinymanNIC0: ens7f0
+yieldlyNIC1: ens7f1
+yieldlyNIC0: ens7f0
+meldNIC1: ens7f0
+
+# 25G
+##gardNIC0: enp194s0f0
+##goracleNIC1: enp194s0f0
+##goracleNIC0: enp194s0f1
+##zoneNIC1: enp194s0f1
+##zoneNIC0: enp194s0f0
+##gardNIC1: enp194s0f1
+
+# 100G temporary indirect with gard as center node
+gardNIC0: enp129s0f0
+goracleNIC0: enp129s0f0
+#goracleNIC1: enp129s0f0
+#zoneNIC1: enp129s0f0
+zoneNIC0: enp129s0f0np0
+gardNIC1: enp129s0f1
+
 # testbedSpringfield NIC configuration
 bartNIC0: enp4s0
 homerNIC1: enp4s0
