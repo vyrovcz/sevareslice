@@ -104,7 +104,7 @@ for ip in "${ips[@]}"; do
 	ping -c 2 10.10."$network"."$ip" &>> pinglog || true
 done
 
-# set up swap disk
+# set up swap disk for RAM pageswapping measurements
 if [ -n "$SWAP" ] && [ -b /dev/nvme0n1 ]; then
 	echo "creating swapfile with swap size $SWAP"
 	parted -s /dev/nvme0n1 mklabel gpt
