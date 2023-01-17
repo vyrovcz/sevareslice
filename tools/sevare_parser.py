@@ -8,6 +8,10 @@ import os
 import numpy as np
 from scipy.optimize import curve_fit
 
+# customa imports
+import re
+import glob
+
 # SEVARE PARSER 2.0 - adapted to new table forms
 # Format of short datatable:
 #
@@ -192,15 +196,17 @@ sorting_index = -1
 comm_rounds_index = -1
 data_sent_index = -1
 
-variable_array = ["latencies(ms)", "bandwidths(Mbs)", "packetdrops(%)", "freqs(GHz)", "quotas(%)", "cpus", "input_size"]  # Names from the table!
-var_name_array = ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # HAS TO MATCH ABOVE ARRAY - values are hardcoded within script!
+variable_array = ["datatype"] # Adaptions
+variable_array += ["latencies(ms)", "bandwidths(Mbs)", "packetdrops(%)", "freqs(GHz)", "quotas(%)", "cpus", "input_size"]  # Names from the table!
+var_name_array = ["Dtp_"] # Adaptions
+var_name_array += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # HAS TO MATCH ABOVE ARRAY - values are hardcoded within script!
 var_val_array = [None] * len(variable_array)  # used to store changing variables
 index_array = [-1] * len(variable_array)
 datafile_array = [None] * len(variable_array)
 
 
 
-# Get indexes of demanded columns
+# Get indexes of present columns
 for i in range(len(header)):
     # Indexes of variables
     for j in range(len(index_array)):
@@ -240,9 +246,18 @@ dataset_array = []
 for row in data_table.readlines():
     dataset_array.append(row.split(';'))
 
+# get highest input value from summary
+maxinput = -1
+with open(glob.glob(data_dir + "E*-run-summary.dat")[0], "r") as f:
+    for line in f:
+        match = re.search(r"Inputs.*", line)
+        if match:
+            maxinput = match.group(0).split(" ")[-1]
+            break
+
 # - - - - - - - Parsing for 2D plots - - - - - - - -
 # Go through dataset for each variable
-# print(index_array)
+print(index_array)
 for i in range(len(index_array)):
     # Only parse for variables that are measured in the table
     if index_array[i] == -1:
@@ -267,12 +282,16 @@ for i in range(len(index_array)):
             datafile2D = open(data_dir + "parsed/2D/" + var_name_array[i] + protocol + ".txt", "a", 1)
 
             # Fill up the var_val array with initial values of every other configured parameter - have to be fix (controlled variables)
+            # skip the input size, found in previous step
             for j in range(len(index_array)):
                 if index_array[j] != -1 and i != j:
-                    var_val_array[j] = line[index_array[j]]
+                    if j < len(index_array) - 1:
+                        var_val_array[j] = line[index_array[j]]
+                    else:
+                        var_val_array[-1] = maxinput # Adapt: fix to highest input
                 else:
                     var_val_array[j] = None  # may be inefficient
-            # print(protocol + str(var_name_array[i]) + str(var_val_array))
+            print(protocol + str(var_name_array[i]) + str(var_val_array))
 
             # Fill up metrics arrays
             comm_rounds_array.append(line[comm_rounds_index])
