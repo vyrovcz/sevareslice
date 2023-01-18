@@ -99,40 +99,6 @@ def interpolate_inverse(file_, data_sent="nothing"):
     return popt
 
 
-# Input: protocol, String
-# Output: Integer (-1 -> did not find protocol, 0 -> mal_dis, 1 -> mal_hon, 2 -> semi_dis, 3 -> semi_hon)
-def get_security_class(prot):
-    protocols_mal_dis = ["mascot", "lowgear", "highgear", "chaigear", "cowgear", "spdz2k", "tinier", "real-bmr"]
-    protocols_mal_hon = ["hemi", "semi", "temi", "soho", "semi2k", "semi-bmr", "semi-bin"]
-    protocols_semi_dis = ["sy-shamir", "malicious-shamir", "malicious-rep-field", "ps-rep-field", "sy-rep-field",
-                          "brain", "malicious-rep-ring", "yao", "yaoO",
-                          "ps-rep-ring", "sy-rep-ring", "malicious-rep-bin", "malicious-ccd", "ps-rep-bin",
-                          "mal-shamir-bmr", "mal-rep-bmr"]
-    protocols_semi_hon = ["atlas", "shamir", "replicated-field", "replicated-ring", "shamir-bmr", "rep-bmr",
-                          "replicated-bin", "ccd"]
-    if prot in protocols_mal_dis:
-        return 0
-    if prot in protocols_mal_hon:
-        return 1
-    if prot in protocols_semi_dis:
-        return 2
-    if prot in protocols_semi_hon:
-        return 3
-    else:
-        print("ERROR: Protocol is was not recognized")
-
-
-def get_security_class_name(class_nb):
-    if class_nb == 0:
-        return "Malicious, Dishonest Majority"
-    if class_nb == 1:
-        return "Malicious, Honest Majority"
-    if class_nb == 2:
-        return "Semi-Honest, Dishonest Majority"
-    if class_nb == 3:
-        return "Semi-Honest, Honest Majority"
-
-
 # Adds empty lines to a 3D datafile each time the x coordinate changes
 def add_empty_lines(file_path):
     with open(file_path, 'r') as file:
@@ -204,7 +170,11 @@ var_val_array = [None] * len(variable_array)  # used to store changing variables
 index_array = [-1] * len(variable_array)
 datafile_array = [None] * len(variable_array)
 
-
+# Adaption
+# switches are on/off values, where a feature is either off or on
+# e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing
+switches_name_array = ["preprocess", "splitroles", "packbool", "optshare"]
+switch_indexes = [-1] * len(switches_name_array)
 
 # Get indexes of present columns
 for i in range(len(header)):
@@ -212,6 +182,11 @@ for i in range(len(header)):
     for j in range(len(index_array)):
         if header[i] == variable_array[j]:
             index_array[j] = i
+    
+     # Adaptions: Indexes of switches
+    for j in range(len(switch_indexes)):
+        if header[i] == switches_name_array[j]:
+            switch_indexes[j] = i
 
     if header[i] == "runtime_chrono(s)":  # Name from the table
         runtime_index = i
@@ -241,6 +216,8 @@ protocol = ""
 protocols = []
 comm_rounds_array = []
 data_sent_array = []
+
+previous = ""
 
 dataset_array = []
 for row in data_table.readlines():
@@ -278,8 +255,8 @@ for i in range(len(index_array)):
             protocol = line[protocol_index]
             protocols.append(protocol)
 
-            # Create 2D file descriptor
-            datafile2D = open(data_dir + "parsed/2D/" + var_name_array[i] + protocol + ".txt", "a", 1)
+            if not os.path.exists(data_dir + "parsed/2D/" + protocol):
+                os.mkdir(data_dir + "parsed/2D/" + protocol)
 
             # Fill up the var_val array with initial values of every other configured parameter - have to be fix (controlled variables)
             # skip the input size, found in previous step
@@ -296,6 +273,16 @@ for i in range(len(index_array)):
             # Fill up metrics arrays
             comm_rounds_array.append(line[comm_rounds_index])
             data_sent_array.append(line[data_sent_index])
+
+        # e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing
+        # path of form parsed/2D/p1/d128Bwd_e0r0c0o1.txt
+        txtpathbase = data_dir + "parsed/2D/" + protocol + "/" + "d" + str(var_val_array[0]) + str(var_name_array[i])
+        txtpath = txtpathbase + "pre" + line[switch_indexes[0]] + "split" + line[switch_indexes[1]] + "pack" + line[switch_indexes[2]] + "opt" + line[switch_indexes[3]] + ".txt"
+        if txtpath != previous :
+            # Create 2D file descriptor
+            datafile2D = open(txtpath, "a", 1)
+            previous = txtpath
+            print(txtpath)            
 
         # Only parse line when it shows the initial values of controlled variables
         if all((var_val_array[j] is None or var_val_array[j] == line[index_array[j]]) for j in range(len(index_array))):

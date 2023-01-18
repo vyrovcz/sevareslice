@@ -113,7 +113,7 @@ else
     ###echo "./Scripts/split-roles.sh -p \"$1\" -a \"$2\" -b \"$3\"" > run.sh
     ###/bin/time -f "$timerf" bash run.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     
-    # calculate mean of 6 numbers
+    # calculate mean of 36 results
     sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
     average=$(echo "scale=6;$sum / 36" | bc -l)
     echo "Time measured to initialize program: ${average}s" &>> testresults
