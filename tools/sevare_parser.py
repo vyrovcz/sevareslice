@@ -150,8 +150,8 @@ data_table = open(data_dir + 'data/' + data_table)
 if not os.path.exists(data_dir + "parsed"):
     os.mkdir(data_dir + "parsed")
 
-runtimes_file_2D = open(data_dir + "parsed/runtimes2D.txt", "a")
-info_file = open(data_dir + "parsed/protocol_infos.txt", "a")
+#runtimes_file_2D = open(data_dir + "parsed/runtimes2D.txt", "a")
+#info_file = open(data_dir + "parsed/protocol_infos.txt", "a")
 
 header = data_table.readline().split(';')
 
@@ -173,8 +173,8 @@ datafile_array = [None] * len(variable_array)
 # Adaption
 # switches are on/off values, where a feature is either off or on
 # e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing
-switches_name_array = ["preprocess", "splitroles", "packbool", "optshare"]
-switch_indexes = [-1] * len(switches_name_array)
+switches_names = ["preprocess", "splitroles", "packbool", "optshare"]
+switch_indexes = [-1] * len(switches_names)
 
 # Get indexes of present columns
 for i in range(len(header)):
@@ -185,7 +185,7 @@ for i in range(len(header)):
     
      # Adaptions: Indexes of switches
     for j in range(len(switch_indexes)):
-        if header[i] == switches_name_array[j]:
+        if header[i] == switches_names[j]:
             switch_indexes[j] = i
 
     if header[i] == "runtime_chrono(s)":  # Name from the table
@@ -201,15 +201,11 @@ for i in range(len(header)):
     elif header[i] == "ALLdataSent(MB)":  # "P0dataSent(MB)"
         data_sent_index = i
 
-# Uses simple get_sorting function to sort
-# if sorting_index != -1:
-#    dataset_array = sorted(dataset_array, key=get_sorting)
-
 if not os.path.exists(data_dir + "parsed/2D"):
     os.mkdir(data_dir + "parsed/2D")
 
-if not os.path.exists(data_dir + "parsed/3D"):
-    os.mkdir(data_dir + "parsed/3D")
+#if not os.path.exists(data_dir + "parsed/3D"):
+#    os.mkdir(data_dir + "parsed/3D")
 
 # Create array of dataset
 protocol = ""
@@ -222,6 +218,15 @@ previous = ""
 dataset_array = []
 for row in data_table.readlines():
     dataset_array.append(row.split(';'))
+
+### Uses simple get_sorting function to sort
+##if sorting_index != -1:
+##   dataset_array = sorted(dataset_array, key=get_sorting)
+
+# Needs to be sorted by protocol, MPSlice exporting order is different
+dataset_array = sorted(dataset_array, key=lambda x: x[protocol_index])
+for row in dataset_array:
+    print(" ".join("{:4}".format(col) for col in row), end = " ")
 
 # get highest input value from summary
 maxinput = -1
@@ -275,14 +280,19 @@ for i in range(len(index_array)):
             data_sent_array.append(line[data_sent_index])
 
         # e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing
+        # default values in case the table is lacking them
+        pre = line[switch_indexes[0]] if switch_indexes[0] > 0 else 0
+        split = line[switch_indexes[1]] if switch_indexes[1] > 0 else 0
+        pack = line[switch_indexes[2]] if switch_indexes[2] > 0 else 0
+        opt = line[switch_indexes[3]] if switch_indexes[3] > 0 else 1
         # path of form parsed/2D/p1/d128Bwd_e0r0c0o1.txt
         txtpathbase = data_dir + "parsed/2D/" + protocol + "/" + "d" + str(var_val_array[0]) + str(var_name_array[i])
-        txtpath = txtpathbase + "pre" + line[switch_indexes[0]] + "split" + line[switch_indexes[1]] + "pack" + line[switch_indexes[2]] + "opt" + line[switch_indexes[3]] + ".txt"
+        txtpath = txtpathbase + "pre" + str(pre) + "split" + str(split) + "pack" + str(pack) + "opt" + str(opt) + ".txt"
         if txtpath != previous :
             # Create 2D file descriptor
             datafile2D = open(txtpath, "a", 1)
             previous = txtpath
-            print(txtpath)            
+                     
 
         # Only parse line when it shows the initial values of controlled variables
         if all((var_val_array[j] is None or var_val_array[j] == line[index_array[j]]) for j in range(len(index_array))):
@@ -466,5 +476,5 @@ datafile2D.close()
 
 
 # - - - - - - Finish - - - - - -
-runtimes_file_2D.close()
-info_file.close()
+#runtimes_file_2D.close()
+#info_file.close()
