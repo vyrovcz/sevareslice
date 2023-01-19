@@ -225,6 +225,7 @@ for row in data_table.readlines():
 
 # Needs to be sorted by protocol, MPSlice exporting order is different
 dataset_array = sorted(dataset_array, key=lambda x: x[protocol_index])
+# debug
 for row in dataset_array:
     print(" ".join("{:4}".format(col) for col in row), end = " ")
 
@@ -273,7 +274,7 @@ for i in range(len(index_array)):
                         var_val_array[-1] = maxinput # Adapt: fix to highest input
                 else:
                     var_val_array[j] = None  # may be inefficient
-            print(protocol + str(var_name_array[i]) + str(var_val_array))
+            print(protocol + " " +  str(var_name_array[i]) + " " +  str(var_val_array))
 
             # Fill up metrics arrays
             comm_rounds_array.append(line[comm_rounds_index])

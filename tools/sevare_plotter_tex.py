@@ -87,7 +87,7 @@ args = parser.parse_args()
 
 filename = args.filename
 
-if filename[len(args.filename) - 1] != '/':
+if filename[-1] != '/':
     filename += '/'
 
 # - - - - - - - - - INIT  - - - - - - - - - - - - -
@@ -110,14 +110,15 @@ last = ""
 print("Commencing 2D Plotting...")
 # look at what variables were used in the experiment
 for data in data_names:
-    # only 2D files, so always 3 char long prefix for variable
-    if last != data[0:4] and data[0] != '.':
-        last = data[0:4]
+    # only 2D files, so always 3 char long prefix for variable between '_'
+    current = data.split("_")[1]
+    if last != current and data[0] != '.':
+        last = current
         if last not in prefixes:
-            prefixes += [last]
+            prefixes += [last + "_"]
             # We want one directory for multiple graphs per variable
             # Its name should be the prefix without the tailing '_'
-            os.mkdir(filename + "plotted/2D/" + last[:len(last) - 1])
+            os.mkdir(filename + "plotted/2D/" + last)
 
 # The runtime is in O(n*m) where n is # of protocols and m # of variables
 # We need to go through all files for each variable to get all the datafiles for a variable to plot them together
