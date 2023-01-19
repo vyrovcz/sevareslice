@@ -44,9 +44,9 @@ limitBandwidth() {
     bandwidth=$(pos_get_variable bandwidths --from-loop)
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
-    tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst 50kb limit 50kb
+    tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst 1000000kb limit 1000000kb
     # check network topology - for directly connected hosts:
-    [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst 50kb limit 50kb
+    [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst 1000000kb limit 1000000kb
     return 0
 }
 

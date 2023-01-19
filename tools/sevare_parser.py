@@ -285,8 +285,9 @@ for i in range(len(index_array)):
         split = line[switch_indexes[1]] if switch_indexes[1] > 0 else 0
         pack = line[switch_indexes[2]] if switch_indexes[2] > 0 else 0
         opt = line[switch_indexes[3]] if switch_indexes[3] > 0 else 1
+        dtype = str(var_val_array[0]) if var_val_array[0] != None else "all"
         # path of form parsed/2D/p1/d128Bwd_e0r0c0o1.txt
-        txtpathbase = data_dir + "parsed/2D/" + protocol + "/" + "d" + str(var_val_array[0]) + str(var_name_array[i])
+        txtpathbase = data_dir + "parsed/2D/" + protocol + "/" + "d" + dtype + "_" + str(var_name_array[i])
         txtpath = txtpathbase + "pre" + str(pre) + "split" + str(split) + "pack" + str(pack) + "opt" + str(opt) + ".txt"
         if txtpath != previous :
             # Create 2D file descriptor
