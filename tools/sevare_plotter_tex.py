@@ -6,10 +6,40 @@
 import argparse
 import os
 import subprocess
+import time
 
-colors = ['black', 'blue', 'brown', 'cyan', 'darkgray', 'gray', 'green', 'lightgray', 'lime', 'magenta', 'olive',
-          'orange', 'pink', 'purple', 'red', 'teal', 'violet', 'white', 'yellow']
+import re
+import textwrap
+import glob
 
+colors = ['blue', 'red', 'orange', 'green', 'cyan', 'black']
+nodehardware = {}
+nodehardware.update({node: "D-1518(2.2GHz) 32GiB 1Gbits" for node in ["dogecoin", "bitcoin", "ether", "todd", "rod", "ned"]})
+nodehardware.update({node: "7543(2.8GHz) 512GiB 25Gbits" for node in ["gard", "goracle", "zone"]})
+nodehardware.update({node: "6312U(2.4GHz) 512GiB 25Gbits" for node in ["meld", "yieldly", "tinyman"]})
+
+legenddict = {
+    "1": "Sharemind",
+    "2": "Replicated",
+    "3": "Astra",
+    "4": "OEC DUP",
+    "5": "OEC REP",
+    "6": "TTP",
+    "d1": "bool",
+    "d8": "char",
+    "d64": "uint64",
+    "d128": "SSE",
+    "d256": "AVX",
+    "d512": "AVX512"
+}
+
+def get_Specs(path):
+    # get highest input value from summary
+    with open(glob.glob(path.split("plotted")[0] + "E*-run-summary.dat")[0], "r") as f:
+        for line in f:
+            match = re.search(r"Nodes.*", line)
+            if match:
+                return nodehardware[match.group(0).split(" ")[2]]
 
 # Is used to generate the axis labels of plots
 def get_name(prefix_):
@@ -17,158 +47,225 @@ def get_name(prefix_):
     prefix_names += ["Latency (ms)", "Bandwidths (Mbit/s)", "Packet Loss (%)", "Frequency (GHz)", "Quotas(%)",
                     "CPU Threads", "Input Size"]  # Axis names
     prefixes_ = ["Dtp_"] # Adaptions
-    prefixes_ += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Set_"]
+    prefixes_ += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]
 
     if prefix_ in prefixes_:
         return prefix_names[prefixes_.index(prefix_)]
     return prefix_
 
+def indentor(file, indentation_level, text):
+    file.write(textwrap.indent(text, prefix=" " * 4 * indentation_level) + os.linesep)
 
-def generate_tex_plot(tex_name, exp_prefix, included_protocols):
+def getConsString(constellation):
+    return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"]
+
+
+def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
     """
     Creates a .tex file for a single 2D plot
     :param tex_name: name of the tex file
-    :param exp_prefix: prefix (giving the experiment variable(s)) of the datafile
-    :param included_protocols: list of protocol names to be included in the plot
+    :param exp_prefix: bandwidth, cpus, freqs, etc
+    :param plots: list of protocol names to be included in the plot
+    :param name: Protocol, Datatype
     // Path + prefix + included_protocol must point to the txt datafile of the protocol
     """
-    path = "/parsed/2D/"
-    tex_writer = open(tex_name, "w")
-    tex_writer.write(r'\documentclass[8pt]{beamer}')
+    file = open(tex_name, "w")
+    # indentor("file to write to", indentation level, code) the 'r' makes the string raw
+    indentor(file, 0, "%% Build with sevareparser on day %%")
+    indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()) + "      %%")
+    indentor(file, 0, r"\begin{frame}")
+    indentor(file, 0, r"\frametitle{MP-Slice Runtimes " + name + " (" + legenddict[name.split(" ")[-1]] + ")}")
+    indentor(file, 0, r"\begin{figure}")
+    indentor(file, 1, r"\begin{tikzpicture}[scale = 0.9]")
+    # axis definition
+    indentor(file, 2, r"\begin{axis}[")
+    indentor(file, 3, "xlabel={" + get_name(exp_prefix) + "},")
+    indentor(file, 3, "ylabel={runtime [s]},")
+    indentor(file, 3, "legend style={anchor=west, legend pos=outer north east},")
+    indentor(file, 3, "%xmax=0.1,")
+    indentor(file, 3, "%ymax=0.1,")
+    indentor(file, 2, "]")
 
-    tex_writer.write("\\setbeamertemplate{itemize item}{$-$}\n")
-    tex_writer.write("\\usepackage{pgf}\n")
-    tex_writer.write("\\usepackage{pgfplots}\n")
-    tex_writer.write("\\pgfplotsset{compat=newest}\n\n")
+    for g in range(len(plots)):
+        plotpath = "../parsed/2D/"  + plots[g] + "_" + exp_prefix + getConsString(constellation) + ".txt"
+        print("    " + plotpath)
+        divisor = plots[g].split("/")[1][1:]
+        dtypeNorm =  r" [y expr=\thisrowno{1} / " + divisor + "] "
+        indentor(file, 3, r"\addplot[mark=|, thick, color=" + colors[g] + "] table" + dtypeNorm + " {" + plotpath + "};")
+    
+    mode = 0 if datatypemode else 1
+    #print([plot.split("/") for plot in plots])
+    indentor(file, 3, r"\legend{" + ', '.join([legenddict[key.split("/")[mode]] for key in plots ]) + "}")
+    indentor(file, 2, r"\end{axis}")
+    indentor(file, 1, r"\end{tikzpicture}")
 
-    tex_writer.write("\\begin{document}\n\n")
+    indentor(file, 1, r"\begin{itemize}")
+    indentor(file, 1, r"\item Ref.Problem: Scalable Search")
+    indentor(file, 1, r"\item Library: MP-Slice - " + name + " (" + legenddict[name.split(" ")[-1]] + ")")
+    indentor(file, 1, r"\item Metric: " + get_name(exp_prefix) + " - runtime")
+    switchpositions = "Preprocessing: " + constellation["pre"] + ", Split Roles: " + constellation["split"]
+    switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
+    indentor(file, 1, r"\item Switches: " + switchpositions)
+    indentor(file, 1, r"\item Specs: " + get_Specs(tex_name))
+    indentor(file, 1, r"\end{itemize}")
 
-    tex_writer.write("\\begin{frame}\n")
-    # tex_writer.write("    \\frametitle{MP-Slice Runtimes Datatype -d 1}\n")
-    tex_writer.write("    \\begin{figure}\n")
-    tex_writer.write("        \\begin{tikzpicture}\n")
-    tex_writer.write("            \\begin{axis}[\n")
-    tex_writer.write("                xlabel={" + get_name(exp_prefix) + "}, ylabel={runtime [s]},legend style={anchor=west, legend pos=outer north east}]\n")
+    indentor(file, 0, r"\end{figure}")
+    indentor(file, 0, r"\end{frame}")
 
-    for g in range(len(included_protocols)):
-        tex_writer.write("                \\addplot[mark=|, color= " + colors[g] + ",   thick] table {../../../" + path + exp_prefix + included_protocols[g] + ".txt};\n")
-
-    tex_writer.write("                \\legend{")
-
-    for included_protocol in included_protocols:
-        tex_writer.write(included_protocol + ",")
-
-    tex_writer.write("}\n")
-    tex_writer.write("            \\end{axis}\n")
-    tex_writer.write("        \\end{tikzpicture}\n")
-
-    tex_writer.write("        \\begin{itemize}\n")
-    tex_writer.write("            \\item Ref.Problem: Scalable Search\n")
-    tex_writer.write("            \\item Library: MP-Slice - Datatype -d 1\n")
-    tex_writer.write("            \\item Metric: input size - runtime\n")
-    tex_writer.write("            \\item Specs: D-1518(2.2GHz) 32GiB 1Gbits\n")
-    tex_writer.write("        \\end{itemize}\n")
-
-    tex_writer.write("    \\end{figure}\n")
-    tex_writer.write("\\end{frame}\n")
-    tex_writer.write("\\end{document}")
-
-    tex_writer.close()
+    file.close()
 
 # - - - - - - - - ARGUMENTS - - - - - - - - - - -
 
 parser = argparse.ArgumentParser(
     description='This program plots the results parsed by sevare parser.')
 
-parser.add_argument('filename', type=str,
+parser.add_argument('sevaredir', type=str,
                     help='Required, name of the test-run folder (usually of the form MONTH-YEAR).')
 
 args = parser.parse_args()
 
-filename = args.filename
+sevaredir = args.sevaredir
 
-if filename[-1] != '/':
-    filename += '/'
+if sevaredir[-1] != '/':
+    sevaredir += '/'
 
 # - - - - - - - - - INIT  - - - - - - - - - - - - -
 # Check if the parser was executed before
-if "parsed" not in os.listdir(filename):
+if "parsed" not in os.listdir(sevaredir):
     print("Could not find the parsed directory, make sure you executed SevareParser before calling the plotter.")
     exit()
 
 # Create directories
-os.mkdir(filename + "plotted/")
-os.mkdir(filename + "plotted/2D")
+os.mkdir(sevaredir + "plotted/")
 
 # - - - - - - - - CREATE 2D PLOTS - - - - - - - - - - -
 
-data_names = os.listdir(filename + "parsed/2D/")
-
+datatypes = []
 prefixes = []  # will contain the variables for 2D plotting
-last = ""
+constellations = [] # every entry is xxxx where x is either 0 or 1
 
 print("Commencing 2D Plotting...")
-# look at what variables were used in the experiment
-for data in data_names:
-    # only 2D files, so always 3 char long prefix for variable between '_'
-    current = data.split("_")[1]
-    if last != current and data[0] != '.':
-        last = current
-        if last not in prefixes:
-            prefixes += [last + "_"]
-            # We want one directory for multiple graphs per variable
-            # Its name should be the prefix without the tailing '_'
-            os.mkdir(filename + "plotted/2D/" + last)
 
-# The runtime is in O(n*m) where n is # of protocols and m # of variables
-# We need to go through all files for each variable to get all the datafiles for a variable to plot them together
-for prefix in prefixes:
-    # Will hold the filenames organized by security class for the prefix of this iteration
-    protocols = [None] * 4
-    for i in range(4):
-        protocols[i] = []
+# find out the protocols
+protocols = sorted(os.listdir(sevaredir + "parsed/2D/"))
+plots = os.listdir(sevaredir + "parsed/2D/" + protocols[0])
 
-    # sort in the 4 classes
-    for data in data_names:
-        if data[:4] == prefix:
-            print(data)
-            protocol_name = data[4:(len(data) - 4)]
-            if get_security_class(protocol_name) == -1:
-                print("- Protocol " + protocol_name + " not recognized.")
-            else:
-                print(protocol_name)
-                protocols[get_security_class(protocol_name)] += [protocol_name]
+# capture all plotfiles to plot
+for plot in plots:
+    datatypes.append(plot.split("_")[0]) if plot.split("_")[0] != "dall" else None
+    prefixes.append(plot.split("_")[1])
+    constellation = {}
+    for switch, position in re.findall(r'([A-Za-z]+)([01])', plot.split("_")[2][:-4]):
+        constellation[switch] = position
+    constellations.append(constellation)
 
-    # create plots
-    for i in range(4):  # for each security class
-        if not protocols[i]:
-            continue
+# remove duplicates
+prefixes = [i for n, i in enumerate(prefixes) if i not in prefixes[:n]]
+constellations = [i for n, i in enumerate(constellations) if i not in constellations[:n]]
+datatypes = [i for n, i in enumerate(datatypes) if i not in datatypes[:n]]
 
-        # Fill up info of this security class
-        generate_tex_plot(filename + "plotted/2D/" + prefix[:len(last) - 1] + "/" + get_security_class_name(i) + ".tex", prefix, protocols[i])
+print()
+print(datatypes)
+print(prefixes)
+print(constellations)
+print(getConsString(constellations[0]))
+print(protocols)
+print(plots)
+print()
 
-        print("- saved: " + "plotted/2D/" + prefix[:len(last) - 1] + "/" + get_security_class_name(i) + ".tex")
+# generate .tex files into an "include" folder
+os.mkdir(sevaredir + "plotted/include")
+
+## inputsize - runtime (should be always true)
+######
+
+if "Inp" not in prefixes:
+    print("No *_Inp_* found, should exist in any correctly parsed folder")
+    exit()
+
+os.mkdir(sevaredir + "plotted/include/input")
+
+# protocol view
+for constellation in constellations:
+    for protocol in protocols:
+        plots = [protocol + "/" + datatype for datatype in datatypes]
+        savepath = sevaredir + "plotted/include/input/s" + protocol + "_" + getConsString(constellation) + ".tex"
+        genTex(savepath, "Inp_", plots, "Protocol -s " + protocol, constellation)
+        print("- saved: plotted/include/input/s" + protocol + "_" + getConsString(constellation) + ".tex")
+
+# datatype view
+for constellation in constellations:
+    for datatype in datatypes:
+        plots = [protocol + "/" + datatype for protocol in protocols]
+        savepath = sevaredir + "plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex"
+        genTex(savepath, "Inp_", plots, "Datatype -d " + datatype, constellation, 1)
+        print("- saved: plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex")
+
+
+#for prefix in prefixes:
+    
+
+### build main tex file
+with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
+    indentor(file, 0, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    indentor(file, 0, "%% Build with sevareparser on day")
+    indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()))
+    indentor(file, 0, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    indentor(file, 0, "")
+    indentor(file, 0, r"\documentclass[8pt]{beamer}")
+    indentor(file, 0, r"\setbeamertemplate{itemize item}{$-$}")
+    indentor(file, 0, r"\usepackage{pgf}")
+    indentor(file, 0, r"\usepackage{pgfplots}")
+    indentor(file, 0, r"\pgfplotsset{compat=newest}")
+    indentor(file, 0, r"\setbeamertemplate{itemize/enumerate body begin}{\small}")
+    indentor(file, 0, r"\title{Sevarebench Measurement Results}")
+    indentor(file, 0, r"\subtitle{MP-Slice Scalable Search\\ \hfill \\")
+    indentor(file, 0, "Various Measurements}\n")
+
+    indentor(file, 0, r"\begin{document}")
+    indentor(file, 1, r"\frame {")
+    indentor(file, 2, r"\titlepage")
+    indentor(file, 1, "}\n")
+
+    for dir in os.listdir(sevaredir + "plotted/include"):
+        for tex in os.listdir(sevaredir + "plotted/include/" + dir):
+            indentor(file, 1, r"\include{include/" + dir + "/" + tex[:-4] + "}")
+    indentor(file, 0, "")
+    indentor(file, 0, r"\end{document}")
+
+
+os.chdir(sevaredir + "plotted")
+print(os.getcwd())
+subprocess.call(["pdflatex", "sevareplots.tex"])
+
+# clean up the latex mess
+for root, dirs, files in os.walk("."):
+    for file in files:
+        if file[-3:] in ["aux", "snm", "out", "log", "toc", "nav",]:
+            os.remove(os.path.join(root, file))
+
+#####################
 
 # Make tex files and remove auxiliary files
-os.chdir(filename + "plotted/2D/")
-for prefix in prefixes:
-    os.chdir(prefix)
-    latex_files = os.listdir()
-    for latex_file in latex_files:
-        if not latex_file.endswith(".tex"):
-            continue
-        # Compile the LaTeX file
-        subprocess.call(["pdflatex", latex_file])
-
-        # Remove auxiliary files
-        aux_files = [f for f in os.listdir() if (f.endswith(".aux") or f.endswith(".snm") or f.endswith(".out") or f.endswith(".log") or f.endswith(".toc") or f.endswith(".nav"))]
-        for f in aux_files:
-            os.remove(f)
-
-    os.chdir("../")
-
-os.chdir("../../../")
-
-prefixes.remove("CostOfSecurity")
+##os.chdir(sevaredir + "plotted/2D/")
+##for prefix in prefixes:
+##    os.chdir(prefix)
+##    latex_files = os.listdir()
+##    for latex_file in latex_files:
+##        if not latex_file.endswith(".tex"):
+##            continue
+##        # Compile the LaTeX file
+##        subprocess.call(["pdflatex", latex_file])
+##
+##        # Remove auxiliary files
+##        aux_files = [f for f in os.listdir() if (f.endswith(".aux") or f.endswith(".snm") or f.endswith(".out") or f.endswith(".log") or f.endswith(".toc") or f.endswith(".nav"))]
+##        for f in aux_files:
+##            os.remove(f)
+##
+##    os.chdir("../")
+##
+##os.chdir("../../../")
+##
+##prefixes.remove("CostOfSecurity")
 
 # Change exit() at check if 3D data exists if wanting to extend script!
