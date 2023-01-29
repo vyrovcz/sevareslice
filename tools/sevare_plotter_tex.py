@@ -69,50 +69,48 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
     :param name: Protocol, Datatype
     // Path + prefix + included_protocol must point to the txt datafile of the protocol
     """
-    file = open(tex_name, "w")
-    # indentor("file to write to", indentation level, code) the 'r' makes the string raw
-    indentor(file, 0, "%% Build with sevareparser on day %%")
-    indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()) + "      %%")
-    indentor(file, 0, r"\begin{frame}")
-    indentor(file, 0, r"\frametitle{MP-Slice Runtimes " + name + " (" + legenddict[name.split(" ")[-1]] + ")}")
-    indentor(file, 0, r"\begin{figure}")
-    indentor(file, 1, r"\begin{tikzpicture}[scale = 0.9]")
-    # axis definition
-    indentor(file, 2, r"\begin{axis}[")
-    indentor(file, 3, "xlabel={" + get_name(exp_prefix) + "},")
-    indentor(file, 3, "ylabel={runtime [s]},")
-    indentor(file, 3, "legend style={anchor=west, legend pos=outer north east},")
-    indentor(file, 3, "%xmax=0.1,")
-    indentor(file, 3, "%ymax=0.1,")
-    indentor(file, 2, "]")
+    with open(tex_name, "w") as file:
+        # indentor("file to write to", indentation level, code) the 'r' makes the string raw
+        indentor(file, 0, "%% Build with sevareparser on day %%")
+        indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()) + "      %%")
+        indentor(file, 0, r"\begin{frame}")
+        indentor(file, 0, r"\frametitle{MP-Slice Runtimes " + name + " (" + legenddict[name.split(" ")[-1]] + ")}")
+        indentor(file, 0, r"\begin{figure}")
+        indentor(file, 1, r"\begin{tikzpicture}[scale = 0.9]")
+        # axis definition
+        indentor(file, 2, r"\begin{axis}[")
+        indentor(file, 3, "xlabel={" + get_name(exp_prefix) + "},")
+        indentor(file, 3, "ylabel={runtime [s]},")
+        indentor(file, 3, "legend style={anchor=west, legend pos=outer north east},")
+        indentor(file, 3, "%xmax=0.1,")
+        indentor(file, 3, "%ymax=0.1,")
+        indentor(file, 2, "]")
 
-    for g in range(len(plots)):
-        plotpath = "../parsed/2D/"  + plots[g] + "_" + exp_prefix + getConsString(constellation) + ".txt"
-        print("    " + plotpath)
-        divisor = plots[g].split("/")[1][1:]
-        dtypeNorm =  r" [y expr=\thisrowno{1} / " + divisor + "] "
-        indentor(file, 3, r"\addplot[mark=|, thick, color=" + colors[g] + "] table" + dtypeNorm + " {" + plotpath + "};")
-    
-    mode = 0 if datatypemode else 1
-    #print([plot.split("/") for plot in plots])
-    indentor(file, 3, r"\legend{" + ', '.join([legenddict[key.split("/")[mode]] for key in plots ]) + "}")
-    indentor(file, 2, r"\end{axis}")
-    indentor(file, 1, r"\end{tikzpicture}")
+        for g in range(len(plots)):
+            plotpath = "../parsed/2D/"  + plots[g] + "_" + exp_prefix + getConsString(constellation) + ".txt"
+            print("    " + plotpath)
+            divisor = plots[g].split("/")[1][1:]
+            dtypeNorm =  r" [y expr=\thisrowno{1} / " + divisor + "] "
+            indentor(file, 3, r"\addplot[mark=|, thick, color=" + colors[g] + "] table" + dtypeNorm + " {" + plotpath + "};")
+        
+        mode = 0 if datatypemode else 1
+        #print([plot.split("/") for plot in plots])
+        indentor(file, 3, r"\legend{" + ', '.join([legenddict[key.split("/")[mode]] for key in plots ]) + "}")
+        indentor(file, 2, r"\end{axis}")
+        indentor(file, 1, r"\end{tikzpicture}")
 
-    indentor(file, 1, r"\begin{itemize}")
-    indentor(file, 1, r"\item Ref.Problem: Scalable Search")
-    indentor(file, 1, r"\item Library: MP-Slice - " + name + " (" + legenddict[name.split(" ")[-1]] + ")")
-    indentor(file, 1, r"\item Metric: " + get_name(exp_prefix) + " - runtime")
-    switchpositions = "Preprocessing: " + constellation["pre"] + ", Split Roles: " + constellation["split"]
-    switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
-    indentor(file, 1, r"\item Switches: " + switchpositions)
-    indentor(file, 1, r"\item Specs: " + get_Specs(tex_name))
-    indentor(file, 1, r"\end{itemize}")
+        indentor(file, 1, r"\begin{itemize}")
+        indentor(file, 1, r"\item Ref.Problem: Scalable Search")
+        indentor(file, 1, r"\item Library: MP-Slice - " + name + " (" + legenddict[name.split(" ")[-1]] + ")")
+        indentor(file, 1, r"\item Metric: " + get_name(exp_prefix) + " - runtime")
+        switchpositions = "Preprocessing: " + constellation["pre"] + ", Split Roles: " + constellation["split"]
+        switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
+        indentor(file, 1, r"\item Switches: " + switchpositions)
+        indentor(file, 1, r"\item Specs: " + get_Specs(tex_name))
+        indentor(file, 1, r"\end{itemize}")
 
-    indentor(file, 0, r"\end{figure}")
-    indentor(file, 0, r"\end{frame}")
-
-    file.close()
+        indentor(file, 0, r"\end{figure}")
+        indentor(file, 0, r"\end{frame}")
 
 # - - - - - - - - ARGUMENTS - - - - - - - - - - -
 
@@ -163,6 +161,7 @@ for plot in plots:
 prefixes = [i for n, i in enumerate(prefixes) if i not in prefixes[:n]]
 constellations = [i for n, i in enumerate(constellations) if i not in constellations[:n]]
 datatypes = [i for n, i in enumerate(datatypes) if i not in datatypes[:n]]
+datatypes = sorted(datatypes)
 
 print()
 print(datatypes)
@@ -201,7 +200,6 @@ for constellation in constellations:
         genTex(savepath, "Inp_", plots, "Datatype -d " + datatype, constellation, 1)
         print("- saved: plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex")
 
-
 #for prefix in prefixes:
     
 
@@ -235,37 +233,23 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
 
 os.chdir(sevaredir + "plotted")
-print(os.getcwd())
-subprocess.call(["pdflatex", "sevareplots.tex"])
+#print(os.getcwd())
+print("Building latex file plotted/sevareplots.tex")
+print("Please wait ...")
+with open("latexlog", "w") as file:
+    failed = subprocess.call(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file)
+if failed:
+    with open("latexlog", "r") as file:
+        print(file.read())
+else:
+    pdfname="sevareplots_" + time.strftime("%y.%m.%d_%H.%M.%S", time.gmtime()) + ".pdf"
+    print("Latex Build success:")
+    print("    " + sevaredir + pdfname)
+    # move pdf up
+    subprocess.call(["mv", "sevareplots.pdf", "../" + pdfname])
 
 # clean up the latex mess
 for root, dirs, files in os.walk("."):
     for file in files:
         if file[-3:] in ["aux", "snm", "out", "log", "toc", "nav",]:
             os.remove(os.path.join(root, file))
-
-#####################
-
-# Make tex files and remove auxiliary files
-##os.chdir(sevaredir + "plotted/2D/")
-##for prefix in prefixes:
-##    os.chdir(prefix)
-##    latex_files = os.listdir()
-##    for latex_file in latex_files:
-##        if not latex_file.endswith(".tex"):
-##            continue
-##        # Compile the LaTeX file
-##        subprocess.call(["pdflatex", latex_file])
-##
-##        # Remove auxiliary files
-##        aux_files = [f for f in os.listdir() if (f.endswith(".aux") or f.endswith(".snm") or f.endswith(".out") or f.endswith(".log") or f.endswith(".toc") or f.endswith(".nav"))]
-##        for f in aux_files:
-##            os.remove(f)
-##
-##    os.chdir("../")
-##
-##os.chdir("../../../")
-##
-##prefixes.remove("CostOfSecurity")
-
-# Change exit() at check if 3D data exists if wanting to extend script!

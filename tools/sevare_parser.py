@@ -71,7 +71,7 @@ data_sent_index = -1
 variable_array = ["datatype"] # Adaptions
 variable_array += ["latencies(ms)", "bandwidths(Mbs)", "packetdrops(%)", "freqs(GHz)", "quotas(%)", "cpus", "input_size"]  # Names from the table!
 var_name_array = ["Dtp_"] # Adaptions
-var_name_array += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # HAS TO MATCH ABOVE ARRAY - values are hardcoded within script!
+var_name_array += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # HAS TO MATCH ABOVE ARRAY
 var_val_array = [None] * len(variable_array)  # used to store changing variables
 index_array = [-1] * len(variable_array)
 datafile_array = [None] * len(variable_array)
@@ -127,9 +127,9 @@ for row in data_table.readlines():
 
 # Needs to be sorted by protocol, MPSlice exporting order is different
 dataset_array = sorted(dataset_array, key=lambda x: x[protocol_index])
-# debug
-for row in dataset_array:
-    print(" ".join("{:4}".format(col) for col in row), end = " ")
+## debug
+##for row in dataset_array:
+##    print(" ".join("{:4}".format(col) for col in row), end = " ")
 
 # get highest input value from summary
 maxinput = -1
@@ -180,7 +180,7 @@ for i in range(len(index_array)):
                     elif j > 0:
                         var_val_array[-1] = maxinput # Adapt: fix to highest input
                     else:
-                        var_val_array[0] = maxdtype
+                        var_val_array[0] = maxdtype  # Adapt: fix to highest dtype
                 else:
                     var_val_array[j] = None  # may be inefficient
             print(protocol + " " +  str(var_name_array[i]) + " " +  str(var_val_array))
@@ -189,13 +189,12 @@ for i in range(len(index_array)):
             comm_rounds_array.append(line[comm_rounds_index])
             data_sent_array.append(line[data_sent_index])
 
-        # e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing
         # default values in case the table is lacking them
         pre = line[switch_indexes[0]] if switch_indexes[0] > 0 else 0
         split = line[switch_indexes[1]] if switch_indexes[1] > 0 else 0
         pack = line[switch_indexes[2]] if switch_indexes[2] > 0 else 0
         opt = line[switch_indexes[3]] if switch_indexes[3] > 0 else 1
-        # we want all dtypes for variable input
+        # we want all dtypes for variable input, so special case if handling input size
         if i == len(index_array) - 1:
             dtype = line[index_array[0]]
             var_val_array[0] = None
@@ -210,8 +209,9 @@ for i in range(len(index_array)):
             previous = txtpath
 
         # Only parse line when it shows the initial values of controlled variables
-        if all((var_val_array[j] is None or var_val_array[j] == line[index_array[j]]) for j in range(len(index_array))):
+        #print(str([str(var_val_array[j]) + "  " + line[index_array[j]] for j in range(len(index_array))]) + " " + line[runtime_index])
+        #print([var_val_array[j] is None or int(var_val_array[j]) == int(line[index_array[j]]) for j in range(len(index_array))])
+        if all((var_val_array[j] is None or int(var_val_array[j]) == int(line[index_array[j]])) for j in range(len(index_array))):
             datafile2D.write(line[index_array[i]] + '\t' + line[runtime_index] + '\n')
-            # TODO: Check if additional file with y=
 
 datafile2D.close()
