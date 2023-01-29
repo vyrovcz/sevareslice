@@ -81,6 +81,8 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         indentor(file, 2, r"\begin{axis}[")
         indentor(file, 3, "xlabel={" + get_name(exp_prefix) + "},")
         indentor(file, 3, "ylabel={runtime [s]},")
+        indentor(file, 3, "scaled y ticks = false,y tick label style={/pgf/number format/fixed,/pgf/number format/precision=8},")
+        indentor(file, 3, "scaled x ticks = false,x tick label style={/pgf/number format/fixed,/pgf/number format/precision=8},")
         indentor(file, 3, "legend style={anchor=west, legend pos=outer north east},")
         indentor(file, 3, "%xmax=0.1,")
         indentor(file, 3, "%ymax=0.1,")
