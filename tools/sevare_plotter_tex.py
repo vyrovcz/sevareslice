@@ -34,7 +34,6 @@ legenddict = {
 }
 
 def get_Specs(path):
-    # get highest input value from summary
     with open(glob.glob(path.split("plotted")[0] + "E*-run-summary.dat")[0], "r") as f:
         for line in f:
             match = re.search(r"Nodes.*", line)
@@ -43,8 +42,8 @@ def get_Specs(path):
 
 # Is used to generate the axis labels of plots
 def get_name(prefix_):
-    prefix_names = ["datatype"] # Adaptions
-    prefix_names += ["Latency (ms)", "Bandwidths (Mbit/s)", "Packet Loss (%)", "Frequency (GHz)", "Quotas(%)",
+    prefix_names = ["Datatype [bits]"] # Adaptions
+    prefix_names += ["Latency [ms]", "Bandwidths [Mbit/s]", "Packet Loss [%]", "Frequency [GHz]", "Quotas [%]",
                     "CPU Threads", "Input Size"]  # Axis names
     prefixes_ = ["Dtp_"] # Adaptions
     prefixes_ += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]
@@ -59,6 +58,11 @@ def indentor(file, indentation_level, text):
 def getConsString(constellation):
     return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"]
 
+def fileExists(path, substring):
+    for file in os.listdir(path):
+        if file.find(substring) != -1:
+            return True
+    return False
 
 def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
     """
@@ -74,7 +78,7 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         indentor(file, 0, "%% Build with sevareparser on day %%")
         indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()) + "      %%")
         indentor(file, 0, r"\begin{frame}")
-        indentor(file, 0, r"\frametitle{MP-Slice Runtimes " + name + " (" + legenddict[name.split(" ")[-1]] + ")}")
+        indentor(file, 0, r"\frametitle{MP-Slice Runtimes " + get_name(exp_prefix).split("[")[0] + name + " (" + legenddict[name.split(" ")[-1]] + ")}")
         indentor(file, 0, r"\begin{figure}")
         indentor(file, 1, r"\begin{tikzpicture}[scale = 0.9]")
         # axis definition
@@ -92,10 +96,11 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
             plotpath = "../parsed/2D/"  + plots[g] + "_" + exp_prefix + getConsString(constellation) + ".txt"
             print("    " + plotpath)
             divisor = plots[g].split("/")[1][1:]
+            divisor = divisor if isinstance(divisor, int) else "1"
             dtypeNorm =  r" [y expr=\thisrowno{1} / " + divisor + "] "
             indentor(file, 3, r"\addplot[mark=|, thick, color=" + colors[g] + "] table" + dtypeNorm + " {" + plotpath + "};")
         
-        mode = 0 if datatypemode else 1
+        mode = 1 if datatypemode else 0
         #print([plot.split("/") for plot in plots])
         indentor(file, 3, r"\legend{" + ', '.join([legenddict[key.split("/")[mode]] for key in plots ]) + "}")
         indentor(file, 2, r"\end{axis}")
@@ -104,7 +109,7 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         indentor(file, 1, r"\begin{itemize}")
         indentor(file, 1, r"\item Ref.Problem: Scalable Search")
         indentor(file, 1, r"\item Library: MP-Slice - " + name + " (" + legenddict[name.split(" ")[-1]] + ")")
-        indentor(file, 1, r"\item Metric: " + get_name(exp_prefix) + " - runtime")
+        indentor(file, 1, r"\item Metric: " + get_name(exp_prefix).split("[")[0] + " - runtime")
         switchpositions = "Preprocessing: " + constellation["pre"] + ", Split Roles: " + constellation["split"]
         switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
         indentor(file, 1, r"\item Switches: " + switchpositions)
@@ -165,6 +170,20 @@ constellations = [i for n, i in enumerate(constellations) if i not in constellat
 datatypes = [i for n, i in enumerate(datatypes) if i not in datatypes[:n]]
 datatypes = sorted(datatypes)
 
+# get highest input value from summary
+maxinput = -1
+maxdtype = -1
+with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
+    for line in f:
+        match = re.search(r"Inputs.*", line)
+        if match:
+            numbers = [int(x) for x in re.findall(r'\b\d+\b', match.group(0))]
+            maxinput = max(numbers)
+        match = re.search(r"Datatypes.*", line)
+        if match:
+            numbers = [int(x) for x in re.findall(r'\b\d+\b', match.group(0))]
+            maxdtype = max(numbers)   
+
 print()
 print(datatypes)
 print(prefixes)
@@ -191,7 +210,7 @@ for constellation in constellations:
     for protocol in protocols:
         plots = [protocol + "/" + datatype for datatype in datatypes]
         savepath = sevaredir + "plotted/include/input/s" + protocol + "_" + getConsString(constellation) + ".tex"
-        genTex(savepath, "Inp_", plots, "Protocol -s " + protocol, constellation)
+        genTex(savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
         print("- saved: plotted/include/input/s" + protocol + "_" + getConsString(constellation) + ".tex")
 
 # datatype view
@@ -199,11 +218,31 @@ for constellation in constellations:
     for datatype in datatypes:
         plots = [protocol + "/" + datatype for protocol in protocols]
         savepath = sevaredir + "plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex"
-        genTex(savepath, "Inp_", plots, "Datatype -d " + datatype, constellation, 1)
+        genTex(savepath, "Inp_", plots, " Datatype -d " + datatype, constellation)
         print("- saved: plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex")
 
-#for prefix in prefixes:
-    
+os.mkdir(sevaredir + "plotted/include/manipulations")
+
+## fixed input views
+######
+# datatypes
+for constellation in constellations:
+    plots = [protocol + "/dall" for protocol in protocols]
+    savepath = sevaredir + "plotted/include/manipulations/dall" + "_" + getConsString(constellation) + ".tex"
+    genTex(savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
+    print("- saved: plotted/include/manipulations/dall" + "_" + getConsString(constellation) + ".tex")
+
+
+# bandwidth
+for prefix in ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"]:
+    if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
+        continue
+    for constellation in constellations:
+        plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
+        savepath = sevaredir + "plotted/include/manipulations/d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
+        genTex(savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
+        print("- saved: plotted/include/manipulations/d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex")
+
 
 ### build main tex file
 with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
@@ -237,12 +276,18 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 os.chdir(sevaredir + "plotted")
 #print(os.getcwd())
 print("Building latex file plotted/sevareplots.tex")
-print("Please wait ...")
-with open("latexlog", "w") as file:
-    failed = subprocess.call(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file)
-if failed:
+print("Please wait ... (Timeout set to 60s)")
+try:
+    with open("latexlog", "w") as file:
+        sprun = subprocess.run(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file, timeout=60)
+
+except subprocess.TimeoutExpired:
+    print("\nLatex Build failed. The output:\n")
     with open("latexlog", "r") as file:
-        print(file.read())
+        lines = file.readlines()
+        for line in lines[-20:]:
+            print(line.strip())
+
 else:
     pdfname="sevareplots_" + time.strftime("%y.%m.%d_%H.%M.%S", time.gmtime()) + ".pdf"
     print("Latex Build success:")
