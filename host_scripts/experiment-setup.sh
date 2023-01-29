@@ -63,6 +63,18 @@ ips=()
 # three nodes direct connection topology if true
 if [ "$nic1" != 0 ]; then
 
+	# to achieve high speeds, install ddp drivers
+	if [ "$(hostname | grep -cE "meld|tinyman|yieldly|gard|goracle|zone")" -eq 1 ]; then
+		wget https://downloadmirror.intel.com/763930/ice-1.10.1.2.2.tar.gz
+		tar -xf ice-1.10.1.2.2.tar.gz
+		cd ice-1.10.1.2.2/src/
+		make install
+		cd ..
+		mkdir -p /lib/firmware/updates/intel/ice/ddp/
+		cp ddp/ice-1.3.30.0.pkg /lib/firmware/updates/intel/ice/ddp/
+		modprobe -r ice; modprobe ice
+	fi	
+
 	# verify that nodes array is circularly sorted
 	# this is required for the definition of this topology
 	
@@ -81,19 +93,10 @@ if [ "$nic1" != 0 ]; then
 	ip route add 10.10."$network"."${ips[0]}" dev "$nic0"
 	ip route add 10.10."$network"."${ips[1]}" dev "$nic1"
 
-	# to achieve high speeds, increase mtu and install ddp drivers
+	# to achieve high speeds, increase mtu
 	if [ "$(hostname | grep -cE "meld|tinyman|yieldly|gard|goracle|zone")" -eq 1 ]; then
 		ip link set dev "$nic0" mtu 9700
 		ip link set dev "$nic1" mtu 9700
-
-		wget https://downloadmirror.intel.com/763930/ice-1.10.1.2.2.tar.gz
-		tar -xf ice-1.10.1.2.2.tar.gz
-		cd ice-1.10.1.2.2/src/
-		make install
-		cd ..
-		mkdir -p /lib/firmware/updates/intel/ice/ddp/
-		cp ddp/ice-1.3.30.0.pkg /lib/firmware/updates/intel/ice/ddp/
-		modprobe -r ice; modprobe ice
 	fi
 
 # here the testhosts are connected via switch
