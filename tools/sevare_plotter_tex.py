@@ -15,8 +15,8 @@ import glob
 colors = ['blue', 'red', 'orange', 'green', 'cyan', 'black']
 nodehardware = {}
 nodehardware.update({node: "D-1518(2.2GHz) 32GiB 1Gbits" for node in ["dogecoin", "bitcoin", "ether", "todd", "rod", "ned"]})
-nodehardware.update({node: "7543(2.8GHz) 512GiB 25Gbits" for node in ["gard", "goracle", "zone"]})
-nodehardware.update({node: "6312U(2.4GHz) 512GiB 25Gbits" for node in ["meld", "yieldly", "tinyman"]})
+nodehardware.update({node: "AMD 7543(2.8GHz) 512GiB 25Gbits" for node in ["gard", "goracle", "zone"]})
+nodehardware.update({node: "Intel 6312U(2.4GHz) 512GiB 25Gbits" for node in ["meld", "yieldly", "tinyman"]})
 
 legenddict = {
     "1": "Sharemind",
@@ -30,7 +30,8 @@ legenddict = {
     "d64": "uint64",
     "d128": "SSE",
     "d256": "AVX",
-    "d512": "AVX512"
+    "d512": "AVX512",
+    "all": "all"
 }
 
 def get_Specs(path):
@@ -96,7 +97,8 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
             plotpath = "../parsed/2D/"  + plots[g] + "_" + exp_prefix + getConsString(constellation) + ".txt"
             print("    " + plotpath)
             divisor = plots[g].split("/")[1][1:]
-            divisor = divisor if isinstance(divisor, int) else "1"
+            # this is for the special case where x axis shows the datatype bits, need to divide each y value by the x value
+            divisor = divisor if divisor != "all" else r"\thisrowno{0}"
             dtypeNorm =  r" [y expr=\thisrowno{1} / " + divisor + "] "
             indentor(file, 3, r"\addplot[mark=|, thick, color=" + colors[g] + "] table" + dtypeNorm + " {" + plotpath + "};")
         
@@ -168,7 +170,7 @@ for plot in plots:
 prefixes = [i for n, i in enumerate(prefixes) if i not in prefixes[:n]]
 constellations = [i for n, i in enumerate(constellations) if i not in constellations[:n]]
 datatypes = [i for n, i in enumerate(datatypes) if i not in datatypes[:n]]
-datatypes = sorted(datatypes)
+datatypes = sorted(datatypes, key=lambda x: int(x[1:]))
 
 # get highest input value from summary
 maxinput = -1
@@ -203,45 +205,44 @@ if "Inp" not in prefixes:
     print("No *_Inp_* found, should exist in any correctly parsed folder")
     exit()
 
-os.mkdir(sevaredir + "plotted/include/input")
+os.mkdir(sevaredir + "plotted/include/01input")
 
 # protocol view
 for constellation in constellations:
     for protocol in protocols:
         plots = [protocol + "/" + datatype for datatype in datatypes]
-        savepath = sevaredir + "plotted/include/input/s" + protocol + "_" + getConsString(constellation) + ".tex"
-        genTex(savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
-        print("- saved: plotted/include/input/s" + protocol + "_" + getConsString(constellation) + ".tex")
+        savepath = "plotted/include/01input/01s" + protocol + "_" + getConsString(constellation) + ".tex"
+        genTex(sevaredir + savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
+        print("- saved: " + savepath)
 
 # datatype view
 for constellation in constellations:
-    for datatype in datatypes:
+    for i,datatype in enumerate(datatypes,2):
         plots = [protocol + "/" + datatype for protocol in protocols]
-        savepath = sevaredir + "plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex"
-        genTex(savepath, "Inp_", plots, " Datatype -d " + datatype, constellation)
-        print("- saved: plotted/include/input/" + datatype + "_" + getConsString(constellation) + ".tex")
+        savepath = "plotted/include/01input/0" + str(i) + datatype + "_" + getConsString(constellation) + ".tex"
+        genTex(sevaredir + savepath, "Inp_", plots, " Datatype -d " + datatype, constellation)
+        print("- saved: " + savepath)
 
-os.mkdir(sevaredir + "plotted/include/manipulations")
+os.mkdir(sevaredir + "plotted/include/02manipulations")
 
 ## fixed input views
 ######
 # datatypes
 for constellation in constellations:
     plots = [protocol + "/dall" for protocol in protocols]
-    savepath = sevaredir + "plotted/include/manipulations/dall" + "_" + getConsString(constellation) + ".tex"
-    genTex(savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
-    print("- saved: plotted/include/manipulations/dall" + "_" + getConsString(constellation) + ".tex")
+    savepath = "plotted/include/02manipulations/01dall" + "_" + getConsString(constellation) + ".tex"
+    genTex(sevaredir + savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " all", constellation)
+    print("- saved: " + savepath)
 
-
-# bandwidth
-for prefix in ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"]:
+# other manipulations
+for i,prefix in enumerate(["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
     if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
         continue
     for constellation in constellations:
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
-        savepath = sevaredir + "plotted/include/manipulations/d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
-        genTex(savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
-        print("- saved: plotted/include/manipulations/d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex")
+        savepath = "plotted/include/02manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
+        genTex(sevaredir + savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
+        print("- saved: " + savepath)
 
 
 ### build main tex file
@@ -266,8 +267,8 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 2, r"\titlepage")
     indentor(file, 1, "}\n")
 
-    for dir in os.listdir(sevaredir + "plotted/include"):
-        for tex in os.listdir(sevaredir + "plotted/include/" + dir):
+    for dir in sorted(os.listdir(sevaredir + "plotted/include")):
+        for tex in sorted(os.listdir(sevaredir + "plotted/include/" + dir)):
             indentor(file, 1, r"\include{include/" + dir + "/" + tex[:-4] + "}")
     indentor(file, 0, "")
     indentor(file, 0, r"\end{document}")

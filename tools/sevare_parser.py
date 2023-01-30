@@ -211,7 +211,7 @@ for i in range(len(index_array)):
         # Only parse line when it shows the initial values of controlled variables
         #print(str([str(var_val_array[j]) + "  " + line[index_array[j]] for j in range(len(index_array))]) + " " + line[runtime_index])
         #print([var_val_array[j] is None or int(var_val_array[j]) == int(line[index_array[j]]) for j in range(len(index_array))])
-        if all((var_val_array[j] is None or int(var_val_array[j]) == int(line[index_array[j]])) for j in range(len(index_array))):
+        if all((var_val_array[j] is None or float(var_val_array[j]) == float(line[index_array[j]])) for j in range(len(index_array))):
             datafile2D.write(line[index_array[i]] + '\t' + line[runtime_index] + '\n')
 
 datafile2D.close()
