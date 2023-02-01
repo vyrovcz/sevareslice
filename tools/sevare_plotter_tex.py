@@ -11,6 +11,7 @@ import time
 import re
 import textwrap
 import glob
+import select
 
 colors = ['blue', 'red', 'orange', 'green', 'cyan', 'black']
 nodehardware = {}
@@ -33,6 +34,13 @@ legenddict = {
     "d512": "AVX512",
     "all": "all"
 }
+
+def ask_yes_no(prompt, timeout=10):
+    os.write(1, prompt.encode())
+    ready, _, _ = select.select([0], [], [], timeout)
+    if ready:
+        return os.read(0, 1024).decode().strip().lower() in ['yes', 'y']
+    return True
 
 def get_Specs(path):
     with open(glob.glob(path.split("plotted")[0] + "E*-run-summary.dat")[0], "r") as f:
@@ -142,7 +150,16 @@ if "parsed" not in os.listdir(sevaredir):
     print("Could not find the parsed directory, make sure you executed SevareParser before calling the plotter.")
     exit()
 
-# Create directories
+# Create directory
+if os.path.exists(sevaredir + "plotted"):
+    print("Waring, \"plotted\"-folder exits.")
+    yes = ask_yes_no("Do you want overwrite old data? (yes/no)  Assuming 'yes' in 10 seconds!")
+    print()
+    if yes:
+        subprocess.run(["rm", "-rf", sevaredir + "plotted"])
+    else:
+        exit()
+
 os.mkdir(sevaredir + "plotted/")
 
 # - - - - - - - - CREATE 2D PLOTS - - - - - - - - - - -

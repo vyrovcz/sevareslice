@@ -5,9 +5,18 @@
 import argparse
 import os
 
-# customa imports
+# custom imports
 import re
 import glob
+import select
+import subprocess
+
+def ask_yes_no(prompt, timeout=10):
+    os.write(1, prompt.encode())
+    ready, _, _ = select.select([0], [], [], timeout)
+    if ready:
+        return os.read(0, 1024).decode().strip().lower() in ['yes', 'y']
+    return True
 
 # SEVARE PARSER 2.0 - adapted to new table format
 # Format of short datatable:
@@ -40,7 +49,7 @@ if data_dir[len(args.data_dir)-1] != '/':
 
 # Open datatable
 data_table = None
-for file in os.listdir(data_dir + 'data/'):
+for file in sorted(os.listdir(data_dir + 'data/')):
     if file.endswith(".csv") and ("full" in file or "short" in file):
         print("Found results table...")
         data_table = file
@@ -52,8 +61,17 @@ if data_table is None:
 
 data_table = open(data_dir + 'data/' + data_table)
 
-if not os.path.exists(data_dir + "parsed"):
-    os.mkdir(data_dir + "parsed")
+if os.path.exists(data_dir + "parsed"):
+    print("Waring, \"parsed\"-folder exits.")
+    yes = ask_yes_no("Do you want overwrite old data? (yes/no)  Assuming 'yes' in 10 seconds!")
+    print()
+    if yes:
+        subprocess.run(["rm", "-rf", data_dir + "parsed"])
+    else:
+        exit()
+
+os.mkdir(data_dir + "parsed")
+
 
 #runtimes_file_2D = open(data_dir + "parsed/runtimes2D.txt", "a")
 #info_file = open(data_dir + "parsed/protocol_infos.txt", "a")
