@@ -32,7 +32,7 @@ Use the public key to create a new deploy key for your repository. Add a new Dep
 
 ```
 ssh -p 10022 <username>@<pos-management-server-hostname>
-git clone https://gitlab.lrz.de/tumi8-theses/smc/ba-obrman/code.git sevarebench
+git clone https://github.com/vyrovcz/sevareslice.git sevarebench
 cd sevarebench
 ```
 
@@ -54,7 +54,7 @@ This should print some usage information if successful
 4. Execute the testrun config to test functionality
 
 ```
-./sevarebench.sh --config configs/testruns/testrunBasic.conf node1,node2,node3 &> sevarelog01 &
+./sevarebench.sh --config configs/testruns/basic.conf node1,node2,node3 &> sevarelog01 &
 disown %-  # your shell might disown by default
 ```
 
@@ -69,12 +69,6 @@ Stuck runs should be closed with sigterm code 15 to the process owning all the t
 htop -u $(whoami)
 ```
 and F9. This activates the trap that launches the verification and exporting of the results that have been collected so far, which could take some time. Track the process in the logfile
-
-
-### Add new experiment
-
-Example adding with experiment 36_matrix_mul_float
-
 
 
 ### Add new testbed hosts
@@ -97,14 +91,6 @@ Design and define node connection model. Recommended and intuitive is the circul
 
 
 ## Known limitations
-
-### No protocol compile option support
-
-When compiling the SMC protocols, it is possible to specify compile options such as "-DINSECURE" in the file CONFIG.mine of MP-SPDZ. A custom flag to support this feature is desired.
-
-### No program compile option support
-
-When compiling high level SMC programs, currently a default value with maxmimum support for most protocols is used, such as "-B 64". In some cases, specifiying a custom value can improve performance. Support for custom parameters is desired.
 
 ### Only exporting measurements from first node
 

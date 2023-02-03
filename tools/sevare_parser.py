@@ -8,15 +8,7 @@ import os
 # custom imports
 import re
 import glob
-import select
 import subprocess
-
-def ask_yes_no(prompt, timeout=10):
-    os.write(1, prompt.encode())
-    ready, _, _ = select.select([0], [], [], timeout)
-    if ready:
-        return os.read(0, 1024).decode().strip().lower() in ['yes', 'y']
-    return True
 
 # SEVARE PARSER 2.0 - adapted to new table format
 # Format of short datatable:
@@ -33,10 +25,9 @@ def ask_yes_no(prompt, timeout=10):
 parser = argparse.ArgumentParser(
     description='This program parses the measurement folder outputted by sevare-bench (version from 11/22).')
 
-parser.add_argument('data_dir', type=str, help='Required, name of the test-run folder (normally a date).')
-
-parser.add_argument('-s', type=str, required=False,
-                    help='(Optional) When set the table will be sorted by this parameter beforehand.')
+parser.add_argument('data_dir', type=str, help='Required, testresults dir to parse.')
+parser.add_argument('-s', type=str, help='(Optional) Sort table by <parameter> (3D parsing)')
+parser.add_argument('-f', "--force", action="store_true", help='(Optional) Force overwrite')
 
 args = parser.parse_args()
 
@@ -62,13 +53,11 @@ if data_table is None:
 data_table = open(data_dir + 'data/' + data_table)
 
 if os.path.exists(data_dir + "parsed"):
-    print("Waring, \"parsed\"-folder exits.")
-    yes = ask_yes_no("Do you want overwrite old data? (yes/no)  Assuming 'yes' in 10 seconds!")
-    print()
-    if yes:
-        subprocess.run(["rm", "-rf", data_dir + "parsed"])
-    else:
+    if not args.force:
+        print("Error, \"parsed\"-folder exits. Run parser with -f to force overwriting")
         exit()
+
+    subprocess.run(["rm", "-rf", data_dir + "parsed"])
 
 os.mkdir(data_dir + "parsed")
 

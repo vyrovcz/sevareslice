@@ -11,7 +11,6 @@ import time
 import re
 import textwrap
 import glob
-import select
 
 colors = ['blue', 'red', 'orange', 'green', 'cyan', 'black']
 nodehardware = {}
@@ -34,13 +33,6 @@ legenddict = {
     "d512": "AVX512",
     "all": "all"
 }
-
-def ask_yes_no(prompt, timeout=10):
-    os.write(1, prompt.encode())
-    ready, _, _ = select.select([0], [], [], timeout)
-    if ready:
-        return os.read(0, 1024).decode().strip().lower() in ['yes', 'y']
-    return True
 
 def get_Specs(path):
     with open(glob.glob(path.split("plotted")[0] + "E*-run-summary.dat")[0], "r") as f:
@@ -86,6 +78,8 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         # indentor("file to write to", indentation level, code) the 'r' makes the string raw
         indentor(file, 0, "%% Build with sevareparser on day %%")
         indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()) + "      %%")
+        sectionname = r"\subsection{" + get_name(exp_prefix).split("[")[0] + name + " (" + legenddict[name.split(" ")[-1]] + ") " + getConsString(constellation) + "}"
+        indentor(file, 0, sectionname)
         indentor(file, 0, r"\begin{frame}")
         indentor(file, 0, r"\frametitle{MP-Slice Runtimes " + get_name(exp_prefix).split("[")[0] + name + " (" + legenddict[name.split(" ")[-1]] + ")}")
         indentor(file, 0, r"\begin{figure}")
@@ -134,8 +128,8 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
 parser = argparse.ArgumentParser(
     description='This program plots the results parsed by sevare parser.')
 
-parser.add_argument('sevaredir', type=str,
-                    help='Required, name of the test-run folder (usually of the form MONTH-YEAR).')
+parser.add_argument('sevaredir', type=str, help='Required, testresults dir to plot.')
+parser.add_argument('-f', "--force", action="store_true", help='(Optional) Force overwrite')
 
 args = parser.parse_args()
 
@@ -152,13 +146,11 @@ if "parsed" not in os.listdir(sevaredir):
 
 # Create directory
 if os.path.exists(sevaredir + "plotted"):
-    print("Waring, \"plotted\"-folder exits.")
-    yes = ask_yes_no("Do you want overwrite old data? (yes/no)  Assuming 'yes' in 10 seconds!")
-    print()
-    if yes:
-        subprocess.run(["rm", "-rf", sevaredir + "plotted"])
-    else:
+    if not args.force:
+        print("Error, \"plotted\"-folder exits. Run plotter with -f to force overwriting")
         exit()
+
+    subprocess.run(["rm", "-rf", sevaredir + "plotted"])
 
 os.mkdir(sevaredir + "plotted/")
 
@@ -222,13 +214,13 @@ if "Inp" not in prefixes:
     print("No *_Inp_* found, should exist in any correctly parsed folder")
     exit()
 
-os.mkdir(sevaredir + "plotted/include/01input")
+os.mkdir(sevaredir + "plotted/include/02input")
 
 # protocol view
 for constellation in constellations:
     for protocol in protocols:
         plots = [protocol + "/" + datatype for datatype in datatypes]
-        savepath = "plotted/include/01input/01s" + protocol + "_" + getConsString(constellation) + ".tex"
+        savepath = "plotted/include/02input/01s" + protocol + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
         print("- saved: " + savepath)
 
@@ -236,31 +228,30 @@ for constellation in constellations:
 for constellation in constellations:
     for i,datatype in enumerate(datatypes,2):
         plots = [protocol + "/" + datatype for protocol in protocols]
-        savepath = "plotted/include/01input/0" + str(i) + datatype + "_" + getConsString(constellation) + ".tex"
+        savepath = "plotted/include/02input/0" + str(i) + datatype + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Datatype -d " + datatype, constellation)
         print("- saved: " + savepath)
 
-os.mkdir(sevaredir + "plotted/include/02manipulations")
+os.mkdir(sevaredir + "plotted/include/01manipulations")
 
 ## fixed input views
 ######
-# datatypes
-for constellation in constellations:
-    plots = [protocol + "/dall" for protocol in protocols]
-    savepath = "plotted/include/02manipulations/01dall" + "_" + getConsString(constellation) + ".tex"
-    genTex(sevaredir + savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " all", constellation)
-    print("- saved: " + savepath)
-
 # other manipulations
 for i,prefix in enumerate(["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
     if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
         continue
     for constellation in constellations:
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
-        savepath = "plotted/include/02manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
+        savepath = "plotted/include/01manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
         print("- saved: " + savepath)
 
+# datatypes
+for constellation in constellations:
+    plots = [protocol + "/dall" for protocol in protocols]
+    savepath = "plotted/include/01manipulations/09dall" + "_" + getConsString(constellation) + ".tex"
+    genTex(sevaredir + savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " all", constellation)
+    print("- saved: " + savepath)
 
 ### build main tex file
 with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
@@ -280,13 +271,13 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 0, "Various Measurements}\n")
 
     indentor(file, 0, r"\begin{document}")
-    indentor(file, 1, r"\frame {")
-    indentor(file, 2, r"\titlepage")
-    indentor(file, 1, "}\n")
+    indentor(file, 1, r"\frame{\titlepage}")
+    indentor(file, 1, r"\begin{frame}{Outline}\tableofcontents\end{frame}" + "\n")
 
     for dir in sorted(os.listdir(sevaredir + "plotted/include")):
+        indentor(file, 1, r"\section{" + dir[2:] + "}")
         for tex in sorted(os.listdir(sevaredir + "plotted/include/" + dir)):
-            indentor(file, 1, r"\include{include/" + dir + "/" + tex[:-4] + "}")
+            indentor(file, 2, r"\input{include/" + dir + "/" + tex[:-4] + "}")
     indentor(file, 0, "")
     indentor(file, 0, r"\end{document}")
 
@@ -296,12 +287,15 @@ os.chdir(sevaredir + "plotted")
 print("Building latex file plotted/sevareplots.tex")
 print("Please wait ... (Timeout set to 60s)")
 try:
-    with open("latexlog", "w") as file:
-        sprun = subprocess.run(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file, timeout=60)
+    with open("latex.log", "w") as file:
+        subprocess.run(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file, timeout=60)
+        # run a second time for Table of Contents
+        print("    First Latex Build success, running second build")
+        subprocess.run(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file, timeout=60)
 
 except subprocess.TimeoutExpired:
-    print("\nLatex Build failed. The output:\n")
-    with open("latexlog", "r") as file:
+    print("\nLatex Build failed. The output: (see latex.log for full log)\n")
+    with open("latex.log", "r") as file:
         lines = file.readlines()
         for line in lines[-20:]:
             print(line.strip())
@@ -312,6 +306,8 @@ else:
     print("    " + sevaredir + pdfname)
     # move pdf up
     subprocess.call(["mv", "sevareplots.pdf", "../" + pdfname])
+
+subprocess.call(["mv", "latex.log", ".."])
 
 # clean up the latex mess
 for root, dirs, files in os.walk("."):

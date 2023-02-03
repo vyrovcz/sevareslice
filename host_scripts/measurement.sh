@@ -130,7 +130,6 @@ else
     average=$(echo "scale=6;$sum / 36" | bc -l)
     echo "Time measured to perform computation chrono: ${average}s" &>> testresults
 
-
 fi
 
 pos_sync
