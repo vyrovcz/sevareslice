@@ -39,7 +39,8 @@ def get_Specs(path):
         for line in f:
             match = re.search(r"Nodes.*", line)
             if match:
-                return nodehardware[match.group(0).split(" ")[2]]
+                node = match.group(0).split(" ")[2]
+                return node + nodehardware[node]
 
 # Is used to generate the axis labels of plots
 def get_name(prefix_):
@@ -237,14 +238,18 @@ os.mkdir(sevaredir + "plotted/include/01manipulations")
 ## fixed input views
 ######
 # other manipulations
+manipulations = ""
 for i,prefix in enumerate(["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
     if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
         continue
+    manipulations += prefix
     for constellation in constellations:
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
         savepath = "plotted/include/01manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
         print("- saved: " + savepath)
+
+manipulations = manipulations or "Inp_"
 
 # datatypes
 for constellation in constellations:
@@ -254,6 +259,8 @@ for constellation in constellations:
     print("- saved: " + savepath)
 
 ### build main tex file
+node = ""
+aborted = ""
 with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 0, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     indentor(file, 0, "%% Build with sevareparser on day")
@@ -271,9 +278,32 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 0, "Various Measurements}\n")
 
     indentor(file, 0, r"\begin{document}")
-    indentor(file, 1, r"\frame{\titlepage}")
+    indentor(file, 1, r"\frame{\titlepage")
+    indentor(file, 2, r"\fontsize{6pt}{8pt}\selectfont")
+
+    # title page information
+    capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
+        "SplitRoles", "Pack", "Optimized", "CPUS", "QUOTAS", "FREQS", "RAM",
+        "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
+    with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
+        for line in f:
+            if "completed" in line:
+                indentor(file, 2, r"Experiment run status: completed\\")
+            elif "incomplete" in line:
+                aborted = "_aborted"
+                indentor(file, 2, r"Experiment run status: incomplete\\")
+            elif "Nodes" in line:
+                node = line.split(" ")[6]
+                indentor(file, 2, line[:-1].replace("=", ":") + " (" + nodehardware[node] + ")" + r"\\")
+            elif any(substring in line for substring in capture):
+                indentor(file, 2, line[:-1].replace("_", "\\_").replace("=", ":") + r"\\")
+
+    indentor(file, 2, "Latex build date: " + time.strftime("%y.%m.%d %H:%M", time.gmtime()) + r"\\")
+    indentor(file, 2, r"\vspace{50cm}")
+    indentor(file, 1, "}")
     indentor(file, 1, r"\begin{frame}{Outline}\tableofcontents\end{frame}" + "\n")
 
+    # add all the plots
     for dir in sorted(os.listdir(sevaredir + "plotted/include")):
         indentor(file, 1, r"\section{" + dir[2:] + "}")
         for tex in sorted(os.listdir(sevaredir + "plotted/include/" + dir)):
@@ -283,7 +313,6 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
 
 os.chdir(sevaredir + "plotted")
-#print(os.getcwd())
 print("Building latex file plotted/sevareplots.tex")
 print("Please wait ... (Timeout set to 60s)")
 try:
@@ -301,7 +330,8 @@ except subprocess.TimeoutExpired:
             print(line.strip())
 
 else:
-    pdfname="sevareplots_" + time.strftime("%y.%m.%d_%H.%M.%S", time.gmtime()) + ".pdf"
+    dateid = "sevareplots_" + sevaredir.split("/")[-3] + "-" + sevaredir.split("/")[-2]
+    pdfname = dateid.replace("plots_20", "plots_")[:-3] + "_" + manipulations + node + ( aborted or "" ) + ".pdf"
     print("Latex Build success:")
     print("    " + sevaredir + pdfname)
     # move pdf up
