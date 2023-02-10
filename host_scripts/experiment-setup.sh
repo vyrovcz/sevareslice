@@ -133,7 +133,7 @@ pos_sync
 
 # log link test
 for ip in "${ips[@]}"; do
-	ping -c 2 10.10."$network"."$ip" &>> pinglog || true
+	ping -c 3 10.10."$network"."$ip" &>> pinglog || true
 done
 
 pos_upload pinglog

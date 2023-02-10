@@ -148,9 +148,12 @@ exportExperimentResults() {
 
     # Add speedtest infos to summaryfile
     speedresults="$RPATH/*/speedtest"
+    pingresults="$RPATH/*/pinglog"
+    echo " DEBUG: speedtestresultpath: $speedresults"
     {
         echo -e "\n\n Networking Information"
         grep -hE "measured speed|Threads|total" "$speedresults"
+        grep -E "statistics|rtt" "$pingresults"
     } >> "$SUMMARYFILE"
 
     # push to measurement data git
@@ -162,7 +165,7 @@ exportExperimentResults() {
         GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone "${repourl// /}" git-upload
     fi
 
-    echo " pushing experiment measurement data to git repo$repourl"
+    echo "  pushing experiment measurement data to git repo$repourl"
     cd git-upload || error ${LINENO} "${FUNCNAME[0]} cd into gitrepo failed"
     {
         # a pull is not really required, but for small sizes it doesn't hurt
