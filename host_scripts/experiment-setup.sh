@@ -166,6 +166,8 @@ pos_sync
 	done
 } > speedtest
 
+pos_upload speedtest
+
 # set up swap disk for RAM pageswapping measurements
 if [ -n "$SWAP" ] && [ -b /dev/nvme0n1 ]; then
 	echo "creating swapfile with swap size $SWAP"
