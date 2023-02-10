@@ -128,10 +128,43 @@ fi
 # wait for others to finish setup
 pos_sync
 
+###
+# Networking tests
+
 # log link test
 for ip in "${ips[@]}"; do
 	ping -c 2 10.10."$network"."$ip" &>> pinglog || true
 done
+
+pos_upload pinglog
+
+# log link test
+# shellcheck source=../tools/speedtest.sh
+source "$REPO2_DIR"/tools/speedtest.sh
+pos_sync
+
+{
+	startserver
+
+	for serverip in $(seq 2 $((groupsize+1))); do
+		for clientip in $(seq 2 $((groupsize+1))); do
+			pos_sync
+			# skip the server
+			[ "$serverip" -eq "$clientip" ] && continue
+			# skip other clients for now
+			[ "$ipaddr" -ne "$clientip" ] && continue
+
+			hostname="${hostname::-1}$serverip"
+			echo "starting speedtest between client ${hostname::-1}$clientip and server ${hostname::-1}$serverip"
+			for k in 1 10; do
+					threads="$k"
+					echo -e "\n Threads: $k\n Serverip: "
+					startclient | grep total
+			done
+		done
+		pos_sync
+	done
+} > speedtest
 
 # set up swap disk for RAM pageswapping measurements
 if [ -n "$SWAP" ] && [ -b /dev/nvme0n1 ]; then
