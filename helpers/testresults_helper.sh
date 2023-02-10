@@ -147,13 +147,13 @@ exportExperimentResults() {
     okfail ok "exported short and full results (${datatableShort::-3}tsv)"
 
     # Add speedtest infos to summaryfile
-    speedresults="$RPATH/*/speedtest"
-    pingresults="$RPATH/*/pinglog"
-    echo " DEBUG: speedtestresultpath: $speedresults"
+    echo " DEBUG: speedtestresultpath: $RPATH"
     {
         echo -e "\n\n Networking Information"
-        grep -hE "measured speed|Threads|total" "$speedresults"
-        grep -E "statistics|rtt" "$pingresults"
+        # get speedtest results
+        grep -hE "measured speed|Threads|total" "$RPATH"/*/speedtest
+        # get pingtest results
+        grep -E "statistics|rtt" "$RPATH"/*/pinglog
     } >> "$SUMMARYFILE"
 
     # push to measurement data git
