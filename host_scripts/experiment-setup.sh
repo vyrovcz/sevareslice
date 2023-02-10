@@ -155,10 +155,10 @@ pos_sync
 			[ "$ipaddr" -ne "$clientip" ] && continue
 
 			hostname="${hostname::-1}$serverip"
-			echo "starting speedtest between client ${hostname::-1}$clientip and server ${hostname::-1}$serverip"
+			echo "measured speed between nodes $((clientip-1)) and server $((serverip-1))"
 			for k in 1 10; do
 					threads="$k"
-					echo -e "\n Threads: $k\n Serverip: "
+					echo -e "\n Threads: $k"
 					startclient | grep total
 			done
 		done

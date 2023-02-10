@@ -146,6 +146,13 @@ exportExperimentResults() {
     column -s ';' -t "$datatableShort" > "${datatableShort::-3}"tsv
     okfail ok "exported short and full results (${datatableShort::-3}tsv)"
 
+    # Add speedtest infos to summaryfile
+    speedresults="$RPATH/*/speedtest"
+    {
+        echo -e "\n\n Networking Information"
+        grep -hE "measured speed|Threads|total" "$speedresults"
+    } >> "$SUMMARYFILE"
+
     # push to measurement data git
     repourl=$(grep "repoupload" global-variables.yml | cut -d ':' -f 2-)
     # check if upload git does not exist yet
