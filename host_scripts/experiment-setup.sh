@@ -141,7 +141,6 @@ pos_upload pinglog
 # log link test
 # shellcheck source=../tools/speedtest.sh
 source "$REPO2_DIR"/tools/speedtest.sh
-pos_sync
 
 {
 	startserver
@@ -162,7 +161,6 @@ pos_sync
 					startclient | grep total
 			done
 		done
-		pos_sync
 	done
 } > speedtest
 

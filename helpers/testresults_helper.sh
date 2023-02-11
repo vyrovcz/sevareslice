@@ -151,9 +151,15 @@ exportExperimentResults() {
     {
         echo -e "\n\n Networking Information"
         # get speedtest results
-        grep -hE "measured speed|Threads|total" "$RPATH"/*/speedtest
+        for node in "${NODES[@]}"; do
+            echo "Node $node statistics"
+            grep -hE "measured speed|Threads|total" "$RPATH/$node"/speedtest 
+        done
         # get pingtest results
-        grep -hE "statistics|rtt" "$RPATH"/*/pinglog
+        for node in "${NODES[@]}"; do
+            echo "Node $node statistics"
+            grep -hE "statistics|rtt" "$RPATH/$node"/pinglog
+        done
     } >> "$SUMMARYFILE"
 
     # push to measurement data git
