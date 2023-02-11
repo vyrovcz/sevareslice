@@ -153,7 +153,7 @@ exportExperimentResults() {
         # get speedtest results
         grep -hE "measured speed|Threads|total" "$RPATH"/*/speedtest
         # get pingtest results
-        grep -E "statistics|rtt" "$RPATH"/*/pinglog
+        grep -hE "statistics|rtt" "$RPATH"/*/pinglog
     } >> "$SUMMARYFILE"
 
     # push to measurement data git
