@@ -316,7 +316,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             indentor(file, 2, r"Experiment Networking Information\\")
             for line in f:
                 # Process the line as needed
-                indentor(file, 2, line + r"\\")
+                indentor(file, 2, line.strip() + r"\\")
     indentor(file, 1, "}")
 
 
