@@ -132,7 +132,7 @@ pos_sync
 # Networking tests
 
 # don't start test simultaneously
-sleep "$ip"
+sleep "$ipaddr"
 
 # log link test
 for ip in "${ips[@]}"; do
