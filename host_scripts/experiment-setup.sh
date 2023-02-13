@@ -131,9 +131,12 @@ pos_sync
 ###
 # Networking tests
 
+# don't start test simultaneously
+sleep "$ip"
+
 # log link test
 for ip in "${ips[@]}"; do
-	ping -c 3 10.10."$network"."$ip" &>> pinglog || true
+	ping -c 5 10.10."$network"."$ip" &>> pinglog || true
 done
 
 pos_upload pinglog
