@@ -14,7 +14,7 @@ import glob
 
 colors = ['blue', 'red', 'orange', 'green', 'cyan', 'black']
 nodehardware = {}
-nodehardware.update({node: "D-1518(2.2GHz) 32GiB 1Gbits" for node in ["dogecoin", "bitcoin", "ether", "todd", "rod", "ned"]})
+nodehardware.update({node: "Intel D-1518(2.2GHz) 32GiB 1Gbits" for node in ["dogecoin", "bitcoin", "ether", "todd", "rod", "ned"]})
 nodehardware.update({node: "AMD 7543(2.8GHz) 512GiB 25Gbits" for node in ["gard", "goracle", "zone"]})
 nodehardware.update({node: "Intel 6312U(2.4GHz) 512GiB 25Gbits" for node in ["meld", "yieldly", "tinyman"]})
 
@@ -305,34 +305,37 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
 
     # Extended Experiment Information
-    indentor(file, 1, r"\begin{frame}")
-    indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
-    indentor(file, 2, r"\begin{multicols}{2}")
     with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
         # Use a while loop to skip lines until we find the target line
-        while True:
-            line = f.readline()
+        line = f.readline()
+        while line:
             if "Networking Information" in line:
                 break
+            line = f.readline()
 
+        # Only add frame, if information actually exists
         if line:
+            indentor(file, 1, r"\begin{frame}")
+            indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
+            indentor(file, 2, r"\begin{multicols}{2}")
             indentor(file, 2, r"Experiment Networking Information\\")
             for line in f:
                 # Process the line as needed
                 indentor(file, 2, line.strip() + r"\\" if line != '\n' else r"\columnbreak")
 
-    indentor(file, 2, r"\end{multicols}")
-    indentor(file, 1, r"\end{frame}")
+            indentor(file, 2, r"\end{multicols}")
+            indentor(file, 1, r"\end{frame}")
 
 
     # Table of Contents page
-    indentor(file, 1, r"\begin{frame}{Outline}\tableofcontents\end{frame}" + "\n")
+    indentor(file, 1, r"\begin{frame}{Outline}\fontsize{5pt}{7pt}\selectfont\tableofcontents\end{frame}" + "\n")
 
     # add all the plots
     for dir in sorted(os.listdir(sevaredir + "plotted/include")):
         indentor(file, 1, r"\section{" + dir[2:] + "}")
         for tex in sorted(os.listdir(sevaredir + "plotted/include/" + dir)):
             indentor(file, 2, r"\input{include/" + dir + "/" + tex[:-4] + "}")
+
     indentor(file, 0, "")
     indentor(file, 0, r"\end{document}")
 
@@ -355,8 +358,22 @@ except subprocess.TimeoutExpired:
             print(line.strip())
 
 else:
-    dateid = "sevareplots_" + sevaredir.split("/")[-3] + "-" + sevaredir.split("/")[-2]
-    pdfname = dateid.replace("plots_20", "plots_")[:-3] + "_" + manipulations + node + ( aborted or "" ) + ".pdf"
+    dateid = sevaredir.split("/")[-3][2:] + "-" + sevaredir.split("/")[-2][:-3]
+    cpumodel = nodehardware[node].split(" ")[1].split("(")[0]
+    positions = {}
+    for switch in ["pre", "split", "pack", "opt"]:
+        for constellation in constellations:
+            if switch in positions:
+                if constellation[switch] != positions[switch]:
+                    positions[switch] = "2"
+            else:
+                positions[switch] = constellation[switch]
+
+    switches = "_" + getConsString(positions).replace("2", "01")
+
+    print("switches: " + switches)
+
+    pdfname = dateid + "_" + manipulations + cpumodel + switches + ( aborted or "" ) + ".pdf"
     print("Latex Build success:")
     print("    " + sevaredir + pdfname)
     # move pdf up
