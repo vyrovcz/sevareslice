@@ -304,7 +304,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
 
     # Extended Experiment Information
-    indentor(file, 1, r"\frame{")
+    indentor(file, 1, r"\begin{frame}")
     with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
         # Use a while loop to skip lines until we find the target line
         while True:
@@ -312,12 +312,13 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             if "Networking Information" in line:
                 break
 
-        if line: 
+        if line:
+            indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
             indentor(file, 2, r"Experiment Networking Information\\")
             for line in f:
                 # Process the line as needed
-                indentor(file, 2, line.strip() + r"\\")
-    indentor(file, 1, "}")
+                indentor(file, 2, line.strip() + r"\\" if line != '\n' else r"\vspace{0.1cm}")
+    indentor(file, 1, r"\end{frame}")
 
 
     # Table of Contents page

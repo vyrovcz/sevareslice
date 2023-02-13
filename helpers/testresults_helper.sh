@@ -149,7 +149,7 @@ exportExperimentResults() {
     # Add speedtest infos to summaryfile
     {
         echo -e "\n\nNetworking Information"
-        echo -e "\nSpeedtest Info"
+        echo "Speedtest Info"
         # get speedtest results
         for node in "${NODES[@]}"; do
             grep -hE "measured speed|Threads|total" "$RPATH/$node"/speedtest 
