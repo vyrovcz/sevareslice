@@ -157,7 +157,7 @@ source "$REPO2_DIR"/tools/speedtest.sh
 			[ "$serverip" -gt "$clientip" ] && continue			
 
 			hostname="${hostname::-1}$serverip"
-			echo "measured speed between nodes $((clientip-1)) and $((serverip-1))"
+			echo "measured speed between nodes $((serverip-1)) and $((clientip-1))"
 			for k in 1 10; do
 					threads="$k"
 					echo -e "\n Threads: $k"

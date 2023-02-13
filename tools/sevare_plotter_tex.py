@@ -314,16 +314,9 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
         if line: 
             indentor(file, 2, r"Experiment Networking Information\\")
-            line = f.readline()
-            while line:
-                if "1 and 2" in line or "1 and 3" in line or "1 and 2" in line:
-                    True
-
-
-                line = f.readline()
-
-
-
+            for line in f:
+                # Process the line as needed
+                indentor(file, 2, line + r"\\")
     indentor(file, 1, "}")
 
 

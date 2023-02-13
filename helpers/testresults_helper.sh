@@ -148,13 +148,14 @@ exportExperimentResults() {
 
     # Add speedtest infos to summaryfile
     {
-        echo -e "\n\nNetworking Information\n"
+        echo -e "\n\nNetworking Information"
+        echo -e "\nSpeedtest Info"
         # get speedtest results
         for node in "${NODES[@]}"; do
-            echo "Node $node statistics"
             grep -hE "measured speed|Threads|total" "$RPATH/$node"/speedtest 
         done
         # get pingtest results
+        echo -e "\nLatency Info"
         for node in "${NODES[@]}"; do
             echo "Node $node statistics"
             grep -hE "statistics|rtt" "$RPATH/$node"/pinglog
