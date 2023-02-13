@@ -111,7 +111,7 @@ if [ "$nic1" != 0 ]; then
 else
 	# support any groupsizes
 	# store other participants ips
-	for i in $(seq 2 "$groupsize"); do
+	for i in $(seq 2 $((groupsize+1))); do
 		[ "$ipaddr" -ne "$i" ] && ips+=( "$i" )
 	done
 
