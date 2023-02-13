@@ -301,6 +301,33 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 2, "Latex build date: " + time.strftime("%y.%m.%d %H:%M", time.gmtime()) + r"\\")
     indentor(file, 2, r"\vspace{50cm}")
     indentor(file, 1, "}")
+
+
+    # Extended Experiment Information
+    indentor(file, 1, r"\frame{")
+    with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
+        # Use a while loop to skip lines until we find the target line
+        while True:
+            line = f.readline()
+            if "Networking Information" in line:
+                break
+
+        if line: 
+            indentor(file, 2, r"Experiment Networking Information\\")
+            line = f.readline()
+            while line:
+                if "1 and 2" in line or "1 and 3" in line or "1 and 2" in line:
+                    True
+
+
+                line = f.readline()
+
+
+
+    indentor(file, 1, "}")
+
+
+    # Table of Contents page
     indentor(file, 1, r"\begin{frame}{Outline}\tableofcontents\end{frame}" + "\n")
 
     # add all the plots

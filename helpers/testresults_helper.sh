@@ -147,9 +147,8 @@ exportExperimentResults() {
     okfail ok "exported short and full results (${datatableShort::-3}tsv)"
 
     # Add speedtest infos to summaryfile
-    echo " DEBUG: speedtestresultpath: $RPATH"
     {
-        echo -e "\n\n Networking Information"
+        echo -e "\n\nNetworking Information\n"
         # get speedtest results
         for node in "${NODES[@]}"; do
             echo "Node $node statistics"

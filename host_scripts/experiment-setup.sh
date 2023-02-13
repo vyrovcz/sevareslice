@@ -152,6 +152,9 @@ source "$REPO2_DIR"/tools/speedtest.sh
 			[ "$serverip" -eq "$clientip" ] && continue
 			# skip other clients for now
 			[ "$ipaddr" -ne "$clientip" ] && continue
+			# skip the client server roles repetitions, this is here explicitly and not 
+			# merged with case one so that this can be deactivated easily if wanted
+			[ "$serverip" -gt "$clientip" ] && continue			
 
 			hostname="${hostname::-1}$serverip"
 			echo "measured speed between nodes $((clientip-1)) and $((serverip-1))"
