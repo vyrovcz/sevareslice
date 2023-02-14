@@ -77,7 +77,7 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
     """
     with open(tex_name, "w") as file:
         # indentor("file to write to", indentation level, code) the 'r' makes the string raw
-        indentor(file, 0, "%% Build with sevareparser on day %%")
+        indentor(file, 0, "%% Built with sevareparser on day %%")
         indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()) + "      %%")
         sectionname = r"\subsection{" + get_name(exp_prefix).split("[")[0] + name + " (" + legenddict[name.split(" ")[-1]] + ") " + getConsString(constellation) + "}"
         indentor(file, 0, sectionname)
@@ -264,7 +264,7 @@ node = ""
 aborted = ""
 with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 0, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    indentor(file, 0, "%% Build with sevareparser on day")
+    indentor(file, 0, "%% Built with sevareparser on day")
     indentor(file, 0, "%%      " + time.strftime("%d %B %Y", time.gmtime()))
     indentor(file, 0, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     indentor(file, 0, "")
@@ -300,7 +300,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             elif any(substring in line for substring in capture):
                 indentor(file, 2, line[:-1].replace("_", "\\_").replace("=", ":") + r"\\")
 
-    indentor(file, 2, "Latex build date: " + time.strftime("%y.%m.%d %H:%M", time.gmtime()) + r"\\")
+    indentor(file, 2, "Latex built date: " + time.strftime("%y.%m.%d %H:%M", time.gmtime()) + r"\\")
     indentor(file, 2, r"\vspace{50cm}")
     indentor(file, 1, "}")
 
@@ -357,11 +357,11 @@ try:
     with open("latex.log", "w") as file:
         subprocess.run(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file, timeout=60)
         # run a second time for Table of Contents
-        print("    First Latex Build success, running second build")
+        print("    First Latex Built success, running second build")
         subprocess.run(["pdflatex", "sevareplots.tex"], stdout=file, stderr=file, timeout=60)
 
 except subprocess.TimeoutExpired:
-    print("\nLatex Build failed. The output: (see latex.log for full log)\n")
+    print("\nLatex Built failed. The output: (see latex.log for full log)\n")
     with open("latex.log", "r") as file:
         lines = file.readlines()
         for line in lines[-20:]:
@@ -381,7 +381,7 @@ else:
 
     switches = "_" + getConsString(positions).replace("2", "01")
     pdfname = dateid + "_" + manipulations + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
-    print("Latex Build success:")
+    print("Latex Built success:")
     print("    " + sevaredir + pdfname)
     # move pdf up
     subprocess.call(["mv", "sevareplots.pdf", "../" + pdfname])
