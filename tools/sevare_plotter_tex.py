@@ -185,6 +185,7 @@ datatypes = sorted(datatypes, key=lambda x: int(x[1:]))
 # get highest input value from summary
 maxinput = -1
 maxdtype = -1
+minspeed = ""
 with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
     for line in f:
         match = re.search(r"Inputs.*", line)
@@ -319,10 +320,19 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
             indentor(file, 2, r"\begin{multicols}{2}")
             indentor(file, 2, r"Experiment Networking Information\\")
+            regex = r"total (sender|receiver) speed: ([0-9]+\.[0-9]+) Gbits/sec"
+            speeds = []
             for line in f:
-                # Process the line as needed
+                # simply copy the info lines from summary to document
                 indentor(file, 2, line.strip() + r"\\" if line != '\n' else r"\columnbreak")
+                # find the measured speeds to add to the filename
+                match = re.search(regex, line)
+                if match:
+                    # extract the Gbit/s value and add it to the list
+                    speeds.append(float(match.group(2)))
 
+            if len(speeds) > 0:
+                minspeed = "_" + str(min(speeds)).split(".")[0] + "Gbs"
             indentor(file, 2, r"\end{multicols}")
             indentor(file, 1, r"\end{frame}")
 
@@ -370,10 +380,7 @@ else:
                 positions[switch] = constellation[switch]
 
     switches = "_" + getConsString(positions).replace("2", "01")
-
-    print("switches: " + switches)
-
-    pdfname = dateid + "_" + manipulations + cpumodel + switches + ( aborted or "" ) + ".pdf"
+    pdfname = dateid + "_" + manipulations + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
     print("Latex Build success:")
     print("    " + sevaredir + pdfname)
     # move pdf up
