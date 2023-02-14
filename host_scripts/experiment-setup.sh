@@ -27,7 +27,7 @@ installDriver() {
 	wget https://downloadmirror.intel.com/763930/ice-1.10.1.2.2.tar.gz
 	tar -xf ice-1.10.1.2.2.tar.gz
 	cd ice-1.10.1.2.2/src/
-	make install
+	make install &> makelog || true
 	cd ..
 	mkdir -p /lib/firmware/updates/intel/ice/ddp/
 	cp ddp/ice-1.3.30.0.pkg /lib/firmware/updates/intel/ice/ddp/
