@@ -220,7 +220,7 @@ setParameters() {
     # set experiment wide variables (append random num to mitigate conflicts)
     experimentvarpath="variables/experiment-variables-$NETWORK.yml"
     echo "experiment: $EXPERIMENT" > "$experimentvarpath"
-    echo "manipulate: $manipulate" > "$experimentvarpath"
+    echo "manipulate: $manipulate" >> "$experimentvarpath"
 
     # generate loop-variables.yml (append random num to mitigate conflicts)
     loopvarpath="variables/loop-variables-$NETWORK.yml"
