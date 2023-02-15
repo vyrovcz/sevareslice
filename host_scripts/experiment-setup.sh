@@ -170,6 +170,8 @@ source "$REPO2_DIR"/tools/speedtest.sh
 	done
 } > speedtest
 
+stopserver
+
 pos_upload speedtest
 
 # set up swap disk for RAM pageswapping measurements

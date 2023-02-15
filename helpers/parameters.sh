@@ -83,7 +83,7 @@ PREPROCESS=( 0 )
 SPLITROLES=( 0 )
 PACKBOOL=( 0 )
 OPTSHARE=( 1 )
-
+manipulate=""
 
 INPUTS=( 4096 )
 CPUS=()
@@ -113,7 +113,7 @@ setParameters() {
     # define the flags for the parameters
     # ':' means that the flag expects an argument.
     SHORT=e:,n:,p:,i:,m,c:,q:,f:,r:,l:,b:,d:,x,h
-    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,packbool:,optshare:
+    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,packbool:,optshare:,manipulate:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -167,6 +167,9 @@ setParameters() {
             --optshare)
                 setArray OPTSHARE "$2"
                 shift;;
+            --manipulate)
+                manipulate="$2"
+                shift;;                
             # Host environment manipulation
             -c|--cpu)
                 TTYPES+=( CPUS )
@@ -214,8 +217,13 @@ setParameters() {
     nodetasks=$(pgrep -facu "$(id -u)" "${NODES[0]}")
     [ "$nodetasks" -gt 4 ] && error $LINENO "${FUNCNAME[0]}(): it appears host ${NODES[0]} is currently in use"
 
+    # set experiment wide variables (append random num to mitigate conflicts)
+    experimentvarpath="variables/experiment-variables-$NETWORK.yml"
+    echo experiment: "$EXPERIMENT" > "$experimentvarpath"
+    echo manipulate: "$manipulate" > "$experimentvarpath"
+
     # generate loop-variables.yml (append random num to mitigate conflicts)
-    loopvarpath="loopfiles/loop-variables-$NETWORK.yml"
+    loopvarpath="variables/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
     # Config Vars
     for type in OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE; do

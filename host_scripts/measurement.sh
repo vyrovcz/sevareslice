@@ -12,6 +12,7 @@ set -x
 
 REPO_DIR=$(pos_get_variable repo_dir --from-global)
 REPO2_DIR=$(pos_get_variable repo2_dir --from-global)
+manipulate=$(pos_get_variable manipulate --from-global)
 source "$REPO2_DIR"/protocols.sh
 size=$(pos_get_variable input_size --from-loop)
 protocol=$(pos_get_variable protocol --from-loop)

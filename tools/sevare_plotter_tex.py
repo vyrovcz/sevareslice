@@ -304,7 +304,6 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 2, r"\vspace{50cm}")
     indentor(file, 1, "}")
 
-
     # Extended Experiment Information
     with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
         # Use a while loop to skip lines until we find the target line
@@ -335,7 +334,6 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
                 minspeed = "_" + str(min(speeds)).split(".")[0] + "Gbs"
             indentor(file, 2, r"\end{multicols}")
             indentor(file, 1, r"\end{frame}")
-
 
     # Table of Contents page
     indentor(file, 1, r"\begin{frame}{Outline}\fontsize{5pt}{7pt}\selectfont\tableofcontents\end{frame}" + "\n")
