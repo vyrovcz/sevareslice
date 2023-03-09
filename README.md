@@ -70,6 +70,40 @@ htop -u $(whoami)
 ```
 and F9. This activates the trap that launches the verification and exporting of the results that have been collected so far, which could take some time. Track the process in the logfile
 
+### Add new parameters
+
+#### On-off switch
+
+An on-off switch is a variable that activates or deactivates something, represented as value 0 for "off" and 1 for "on".
+To implement a new switch, code has to be added in various places. The following guides through the steps to add the switch "ssl", that activates or deactives SSL-encryption.
+
+In `helpers\parameters.sh`:
+- function `help()`, add a meaningful help entry:
+
+```
+    # switches
+    ...
+    echo "     --ssl            activate/deactivate SSL encryption"
+```
+
+- add an array variable in the variable definition and load it with a default value:
+
+```
+# MP slice vars with default values
+...
+SSL=( 1 )
+```
+
+- function `setParameters()`, add a optin flag for the switch:
+
+```
+    # define the flags for the parameters
+    ...
+        LONG+=,split:,packbool:,optshare:,ssl:,manipulate:
+```
+
+- 
+
 
 ### Add new testbed hosts
 

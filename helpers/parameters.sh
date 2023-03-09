@@ -26,10 +26,17 @@ help() {
     echo " -n, --nodes          nodes to run the experiment on of the form <node1>[,<node2>,...]"
     echo " -i, --input          input sizes, with <Values>"
     echo -e "\nOptions (optional)"
-    echo "     --etype          experiment type, if applicable, specified with a code"
-    echo "     --compflags      extra flags to compile the protocols with"
-    echo "     --progflags      extra flags to compile the smc program with"
-    echo "     --runflags       extra flags to run the protocols with"
+    #echo "     --etype          experiment type, if applicable, specified with a code"
+    #echo "     --compflags      extra flags to compile the protocols with"
+    #echo "     --progflags      extra flags to compile the smc program with"
+    #echo "     --runflags       extra flags to run the protocols with"
+    echo "     --dtype          set the datatype in bits (1,8,64,128,256)"
+    # switches
+    echo "     --preproc        activate/deactivate preprocessing"
+    echo "     --split          activate/deactivate split roles"
+    echo "     --packbool       activate/deactivate pack booleans (--dtype 1 only)"
+    echo "     --optshare       activate/deactivate optimized sharing"
+    echo "     --ssl            activate/deactivate SSL encryption"
     echo "     --config         config files run with <path> as parameter, nodes can be given separatly"
     echo "                      allowed form: $0 --config file.conf [nodeA,...]"
     echo -e "\nManipulate Host Environment (optional)"
@@ -76,7 +83,7 @@ progflags=""
 runflags=""
 NODES=()
 
-# MP slice vars
+# MP slice vars with default values
 DATATYPE=( 8 )
 PROTOCOL=( 2 )
 PREPROCESS=( 0 )
@@ -113,7 +120,10 @@ setParameters() {
     # define the flags for the parameters
     # ':' means that the flag expects an argument.
     SHORT=e:,n:,p:,i:,m,c:,q:,f:,r:,l:,b:,d:,x,h
-    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:,split:,packbool:,optshare:,manipulate:
+    LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:
+    LONG+=,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:
+    LONG+=,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:
+    LONG+=,split:,packbool:,optshare:,ssl:,manipulate:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -167,6 +177,9 @@ setParameters() {
             --optshare)
                 setArray OPTSHARE "$2"
                 shift;;
+            --ssl)
+                setArray SSL "$2"
+                shift;;                
             --manipulate)
                 manipulate="$2"
                 shift;;                
