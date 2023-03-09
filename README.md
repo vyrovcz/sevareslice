@@ -94,15 +94,15 @@ In `helpers\parameters.sh`:
 SSL=( 1 )
 ```
 
-- function `setParameters()`, add a optin flag for the switch:
+- function `setParameters()`, add an optin flag ($${,ssl:}$$) for the switch:
 
 ```
     # define the flags for the parameters
     ...
-        LONG+=,split:,packbool:,optshare:$${\color{,ssl:}Green}$$,manipulate:
+        LONG+=,split:,packbool:,optshare:$${,ssl:}$$,manipulate:
 ```
 
-- $${\color{,ssl:}Green}$$
+- $${,ssl:}$$
 
 
 ### Add new testbed hosts
