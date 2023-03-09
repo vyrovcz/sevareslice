@@ -338,7 +338,8 @@ parseConfig() {
             echo "###   Starting new experiment run ###"
             echo -e "_____________________________________\n"
             # generate the specifications
-            flagsnparas=( --experiment "$experiment" )
+            #flagsnparas=( --experiment "$experiment" )
+            flagsnparas=( )
             for flag in "${!config[@]}"; do
                 # skip experiment flag
                 [ "$flag" != experiments ] && flagsnparas=( "${flagsnparas[@]}" --"$flag" "${config[$flag]}" )
