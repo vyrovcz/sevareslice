@@ -34,7 +34,7 @@ checkConnection "mirror.lrz.de"
 apt update
 apt install -y automake build-essential git libboost-dev libboost-thread-dev parted \
     libntl-dev libsodium-dev libssl-dev libtool m4 python3 texinfo yasm linux-cpupower \
-    python3-pip time
+    python3-pip time iperf3
 pip3 install -U numpy
 checkConnection "github.com"
 git clone "$REPO" "$REPO_DIR"

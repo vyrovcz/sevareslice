@@ -143,36 +143,36 @@ pos_upload pinglog
 
 # log link test
 # shellcheck source=../tools/speedtest.sh
-##source "$REPO2_DIR"/tools/speedtest.sh
-##
-##{
-##	startserver
-##
-##	for serverip in $(seq 2 $((groupsize+1))); do
-##		for clientip in $(seq 2 $((groupsize+1))); do
-##			#pos_sync
-##			# skip the server
-##			[ "$serverip" -eq "$clientip" ] && continue
-##			# skip other clients for now
-##			[ "$ipaddr" -ne "$clientip" ] && continue
-##			# skip the client server roles repetitions, this is here explicitly and not 
-##			# merged with case one so that this can be deactivated easily if wanted
-##			[ "$serverip" -gt "$clientip" ] && continue			
-##
-##			hostname="${hostname::-1}$serverip"
-##			echo "measured speed between nodes $((serverip-1)) and $((clientip-1))"
-##			for k in 1 10; do
-##					threads="$k"
-##					echo -e "\n Threads: $k"
-##					startclient | grep total
-##			done
-##		done
-##	done
-##} > speedtest
-##
-##stopserver
-##
-##pos_upload speedtest
+source "$REPO2_DIR"/tools/speedtest.sh
+
+{
+	startserver
+
+	for serverip in $(seq 2 $((groupsize+1))); do
+		for clientip in $(seq 2 $((groupsize+1))); do
+			#pos_sync
+			# skip the server
+			[ "$serverip" -eq "$clientip" ] && continue
+			# skip other clients for now
+			[ "$ipaddr" -ne "$clientip" ] && continue
+			# skip the client server roles repetitions, this is here explicitly and not 
+			# merged with case one so that this can be deactivated easily if wanted
+			[ "$serverip" -gt "$clientip" ] && continue			
+
+			hostname="${hostname::-1}$serverip"
+			echo "measured speed between nodes $((serverip-1)) and $((clientip-1))"
+			for k in 1 10; do
+					threads="$k"
+					echo -e "\n Threads: $k"
+					startclient | grep total
+			done
+		done
+	done
+} > speedtest
+
+stopserver
+
+pos_upload speedtest
 
 # set up swap disk for RAM pageswapping measurements
 if [ -n "$SWAP" ] && [ -b /dev/nvme0n1 ]; then
