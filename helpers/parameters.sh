@@ -239,7 +239,9 @@ setParameters() {
     loopvarpath="variables/loop-variables-$NETWORK.yml"
     rm -f "$loopvarpath"
     # Config Vars
-    for type in OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE; do
+    configvars=( OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE )
+    configvars+=( SSL )
+    for type in "${configvars[@]}"; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
         echo "${type,,}: [${parameters// /, }]" >> "$loopvarpath"
@@ -259,7 +261,7 @@ setParameters() {
     # set default swap size, in case --ram is defined
     [ "${#RAM[*]}" -gt 0 ] && SWAP=${SWAP:-4096}
 
-    # Experiment run summary  information output
+    # Experiment run summary information output
     SUMMARYFILE="$EXPORTPATH/Eslice-run-summary.dat"
     mkdir -p "$SUMMARYFILE" && rm -rf "$SUMMARYFILE"
     {
@@ -274,6 +276,7 @@ setParameters() {
         echo "    SplitRoles: ${SPLITROLES[*]}"
         echo "    Pack Bool: ${PACKBOOL[*]}"
         echo "    Optimized Sharing: ${OPTSHARE[*]}"
+        echo "    SSL: ${SSL[*]}"
         echo "    Testtypes:"
         for type in "${TTYPES[@]}"; do
             declare -n ttypes="${type}"

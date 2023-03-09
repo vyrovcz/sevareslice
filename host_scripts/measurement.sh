@@ -10,10 +10,11 @@ set -e
 # log every command
 set -x
 
+# load global variables
 REPO_DIR=$(pos_get_variable repo_dir --from-global)
 REPO2_DIR=$(pos_get_variable repo2_dir --from-global)
 manipulate=$(pos_get_variable manipulate --from-global)
-source "$REPO2_DIR"/protocols.sh
+# load loop variables
 size=$(pos_get_variable input_size --from-loop)
 protocol=$(pos_get_variable protocol --from-loop)
 datatype=$(pos_get_variable datatype --from-loop)
@@ -43,7 +44,7 @@ cd "$REPO_DIR"
     #if [ "$splitroles" == 0 ]; then
         # compile experiment
         /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare"
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
     #fi
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"

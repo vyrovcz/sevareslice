@@ -94,15 +94,75 @@ In `helpers\parameters.sh`:
 SSL=( 1 )
 ```
 
-- function `setParameters()`, add an optin flag (**,ssl:**) for the switch:
+- function `setParameters()`, add an option flag ("**,ssl:**") for the switch:
 
 ```
     # define the flags for the parameters
     ...
-    LONG+=,split:,packbool:,optshare:**,ssl:**,manipulate:
+    LONG+=,split:,packbool:,optshare:,ssl:,manipulate:
 ```
 
-- 
+- and add a case statement to handle the new option:
+
+```
+    while [ $# -gt 1 ]; do
+        case "$1" in
+            ...
+            # MP-Slice args
+            ...
+            --ssl)
+                setArray SSL "$2"
+                shift;;
+```
+
+- load the new switch to the loop variable file:
+
+```
+    # generate loop-variables.yml (append random num to mitigate conflicts)
+    ...
+    # Config Vars
+    ...
+    configvars+=( SSL )
+```
+
+- add a line to the experiment summary information file:
+
+```
+    # Experiment run summary information output
+    ...
+    echo "    Optimized Sharing: ${OPTSHARE[*]}"
+    echo "    SSL: ${SSL[*]}"
+```
+
+In `host_scripts\measurement.sh`:
+- load the values for the experiment loops, referring to the parameters.sh variable name ("**SSL**") in lowercase:
+
+```
+    # load loop variables
+    ...
+    optshare=$(pos_get_variable optshare --from-loop)
+    ssl=$(pos_get_variable ssl --from-loop)
+```
+
+- determine, if switch is a compile option or a runtime option and how it is used (in this case -h)
+- Here, SSL is a compile option, add to the compile ("**-h "$ssl"**") parameters:
+
+```
+        # compile experiment
+        /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
+```
+
+- Assuming it is a runtime option and **not a compile option** (don't do both), add here:
+
+```
+# run the SMC protocol
+if [ "$splitroles" == 0 ]; then
+    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" -h "$ssl" &>> testresults || success=false
+else
+    ...
+    ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" -h "$ssl" &>> testresults || success=false
+```
 
 
 ### Add new testbed hosts
