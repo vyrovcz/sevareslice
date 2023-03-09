@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # install tool
-apt update && apt install iperf3 -y
+apt update
+apt install -y iperf3
 
 # set up recommended MTU
 #ip link set dev <NIC> mtu 9000

@@ -165,6 +165,8 @@ else
     ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" -h "$ssl" &>> testresults || success=false
 ```
 
+Verify
+
 
 ### Add new testbed hosts
 
