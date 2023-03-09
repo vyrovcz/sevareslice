@@ -99,10 +99,10 @@ SSL=( 1 )
 ```
     # define the flags for the parameters
     ...
-        LONG+=,split:,packbool:,optshare:,ssl:,manipulate:
+        LONG+=,split:,packbool:,optshare:$${\color{,ssl:}Green}$$,manipulate:
 ```
 
-- 
+- $${\color{,ssl:}Green}$$
 
 
 ### Add new testbed hosts
