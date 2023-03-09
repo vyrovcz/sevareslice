@@ -91,6 +91,7 @@ In `helpers\parameters.sh`:
 ```
 # MP slice vars with default values
 ...
+OPTSHARE=( 1 )
 SSL=( 1 )
 ```
 
@@ -145,7 +146,7 @@ In `host_scripts\measurement.sh`:
 ```
 
 - determine, if switch is a compile option or a runtime option and how it is used (in this case -h)
-- Here, SSL is a compile option, add to the compile ("**-h "$ssl"**") parameters:
+- Here, SSL is a compile option, add ("**-h "$ssl"**") to the compile parameters:
 
 ```
         # compile experiment

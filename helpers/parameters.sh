@@ -90,6 +90,7 @@ PREPROCESS=( 0 )
 SPLITROLES=( 0 )
 PACKBOOL=( 0 )
 OPTSHARE=( 1 )
+SSL=( 1 )
 manipulate=""
 
 INPUTS=( 4096 )

@@ -5,7 +5,6 @@
 # 
 
 source helpers/style_helper.sh
-source protocols.sh
 source helpers/parameters.sh
 source helpers/trap_helper.sh
 source helpers/pos_helper.sh
