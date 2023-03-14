@@ -14,7 +14,7 @@ verifyExperiment() {
     while [ -n "$loopinfo" ]; do
 
         # get pos filepath of the measurements for the current loop
-        experimentresult=$(find "$resultpath" -name "terminal_output.txt_run*$i" -print -quit)
+        experimentresult=$(find "$resultpath" -name "terminal_output_run*$i".txt -print -quit)
 
         # check existance of files
         if [ ! -f "$experimentresult" ]; then
