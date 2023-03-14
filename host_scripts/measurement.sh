@@ -22,6 +22,7 @@ preprocess=$(pos_get_variable preprocess --from-loop)
 splitroles=$(pos_get_variable splitroles --from-loop)
 packbool=$(pos_get_variable packbool --from-loop)
 optshare=$(pos_get_variable optshare --from-loop)
+ssl=$(pos_get_variable ssl --from-loop)
 
 timerf="%M (Maximum resident set size in kbytes)\n\
 %e (Elapsed wall clock time in seconds)\n\
@@ -109,7 +110,7 @@ else
     #/bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
 
-    # wait until finished, the runs quits earlier
+    # wait until finished, the runs quit earlier
     sleep 2s
     
     # calculate mean of 36 results
