@@ -155,7 +155,6 @@ esac
 
 echo "experiment finished"  >> testresults
 pos_upload --loop testresults
-pos_upload --loop testresults
+pos_upload --loop terminal_output.txt
 # abort if no success
 $success
-pos_sync --loop terminal_output.txt
