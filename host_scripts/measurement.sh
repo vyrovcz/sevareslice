@@ -111,9 +111,6 @@ else
 
     # wait until finished, the runs quits earlier
     sleep 2s
-
-    ###echo "./Scripts/split-roles.sh -p \"$1\" -a \"$2\" -b \"$3\"" > run.sh
-    ###/bin/time -f "$timerf" bash run.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     
     # calculate mean of 36 results
     sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
@@ -158,6 +155,7 @@ esac
 
 echo "experiment finished"  >> testresults
 pos_upload --loop testresults
+pos_upload --loop testresults
 # abort if no success
 $success
-pos_sync --loop
+pos_sync --loop terminal_output.txt
