@@ -6,7 +6,7 @@ sevarebench is a framework for running [MP-SPDZ](https://github.com/data61/MP-SP
 
 ## How to
 
-### To enable git-upload of the measurement data
+### Enable git-upload of the measurement data
 To use this functionality, a repository to store the measurement results is required. How it would work with [github.com](https://github.com/new):
 
 Change global-variables.yml in line "repoupload: git@github.com:reponame/sevaremeasurements.git" to your repository name.
@@ -169,6 +169,13 @@ Verify
 
 
 ### Add new testbed hosts
+
+#### Find out interface names
+
+In a well documented testbed, interface names are simply looked up in the topology overview.
+If, for some reason, the interface names are not documented, the following procedure can help to identify them:
+
+
 
 #### Switch topology
 
