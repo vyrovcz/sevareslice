@@ -58,7 +58,7 @@ def indentor(file, indentation_level, text):
     file.write(textwrap.indent(text, prefix=" " * 4 * indentation_level) + os.linesep)
 
 def getConsString(constellation):
-    return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"]
+    return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"] + "ssl" + constellation["ssl"]
 
 def fileExists(path, substring):
     for file in os.listdir(path):
@@ -285,7 +285,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
     # title page information
     capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
-        "SplitRoles", "Pack", "Optimized", "CPUS", "QUOTAS", "FREQS", "RAM",
+        "SplitRoles", "Pack", "Optimized", "SSL", "CPUS", "QUOTAS", "FREQS", "RAM",
         "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
     with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
         for line in f:
@@ -369,7 +369,8 @@ else:
     dateid = sevaredir.split("/")[-3][2:] + "-" + sevaredir.split("/")[-2][:-3]
     cpumodel = nodehardware[node].split(" ")[1].split("(")[0]
     positions = {}
-    for switch in ["pre", "split", "pack", "opt"]:
+    # add switch positions to the filename
+    for switch in ["pre", "split", "pack", "opt", "ssl"]:
         for constellation in constellations:
             if switch in positions:
                 if constellation[switch] != positions[switch]:

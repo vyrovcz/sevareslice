@@ -46,7 +46,7 @@ cd "$REPO_DIR"
     /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
         -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
     
-    [ "$splitroles" == 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player"
+    [ "$splitroles" -eq 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player"
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 

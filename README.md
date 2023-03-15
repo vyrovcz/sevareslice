@@ -1,8 +1,8 @@
-# Testing Branch for TTP extension implementation
-
-# Benchmark MP-SPDZ programs in pos testing environments
+# Benchmark MP-Slice programs in pos testing environments
 
 sevarebench is a framework for running [MP-SPDZ](https://github.com/data61/MP-SPDZ#protocols) SMC protocols in a [pos](https://dl.acm.org/doi/10.1145/3485983.3494841) -enabled testbed environment.
+
+This sevareslice version is a framework for running [MP-Slice](https://github.com/chart21/MP-Slice/tree/experimental) SMC protocols
 
 ## How to
 
@@ -165,7 +165,80 @@ else
     ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" -h "$ssl" &>> testresults || success=false
 ```
 
-Verify
+Verify functionality:
+- by running a test using the new flag
+
+```
+bash sevarebench.sh --protocols 1,2,...,6 --nodes n1,n2,n3 --dtype 128 --ssl 0,1 --split 0,1 --input 4096,8192,...,40960 &>> sevarelog_n1TEST &
+disown %-
+tail -fn 80 sevarelog_n1TEST
+```
+
+- and verify if exported data looks good
+
+```
+less -S resultsMP-Slice/20xx-xx/xx_xx-xx-xx/data/Eslice_short_results.tsv
+```
+
+Parsing of measurements table
+In `tools\sevare_parser.py`:
+- add the switch to the "switches_names"-array: ("**; h -> ssl**") and ("**, "ssl"**")
+
+```
+# switches are on/off values, where a feature is either off or on
+# e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing; h -> ssl
+switches_names = ["preprocess", "splitroles", "packbool", "optshare", "ssl"]
+```
+
+- add the default value for this switch, in case it has not been specified. The value should correspond to the value set in `helpers\parameters.sh` in a previous step.
+
+```
+        # default values in case the table is lacking them
+        ...
+        opt = line[switch_indexes[3]] if switch_indexes[3] > 0 else 1
+        ssl = line[switch_indexes[4]] if switch_indexes[4] > 0 else 1
+```
+
+- add the switchname to the filename: ("**ssl1**") and ("**+ "ssl" + str(ssl)**")
+
+```
+        # path of form parsed/2D/p1/d128Bwd_pre0split0pack0opt1ssl1.txt
+        ...
+        txtpath = txtpathbase + "pre" + str(pre) + "split" + str(split) + "pack" + str(pack) + "opt" + str(opt) + "ssl" + str(ssl) + ".txt"
+```
+
+- confirm the parsing works by running
+
+```
+python3 tools/sevare_parser.py resultsMP-Slice/20xx-xx/xx_xx-xx-xx
+```
+
+- and verifying that under `parsed/2D/x/` the correct plot files are being created
+
+Plotting the plot files
+In `tools\sevare_plotter_tex.py`:
+- add the switch to the getConsString() function: ("**+ "ssl" + constellation["ssl"]**")
+
+```
+def getConsString(constellation):
+    return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"] + "ssl" + constellation["ssl"]
+```
+
+- add the switch to title page information by adding ("**, "SSL"**") to the capture array:
+
+```
+    # title page information
+    capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
+        "SplitRoles", "Pack", "Optimized", "SSL", "CPUS", "QUOTAS", "FREQS", "RAM",
+        "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
+```
+
+- add the switch information to the filename: ("**, "ssl"**")
+
+```
+    # add switch positions to the filename
+    for switch in ["pre", "split", "pack", "opt", "ssl"]:
+```
 
 
 ### Add new testbed hosts
