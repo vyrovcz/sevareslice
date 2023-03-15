@@ -178,7 +178,7 @@ exportExperimentResults() {
         git pull
         # copy from local folder to git repo folder
         [ ! -d "$EXPORTPATH" ] && mkdir -p "$EXPORTPATH"
-        cp -r ../"$EXPORTPATH"/ "$EXPORTPATH"
+        cp -r ../"$EXPORTPATH" "${EXPORTPATH::-11}"
         git add . 
         git commit -a -m "script upload"
         git push 
