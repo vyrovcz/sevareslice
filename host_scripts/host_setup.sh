@@ -52,4 +52,7 @@ cd "$REPO_DIR"
 # switch to fork
 git checkout experimental
 
+# adjust script to specific needs
+echo "wait" >> Scripts/split-roles-3-execute.sh
+
 echo "global setup successful"
