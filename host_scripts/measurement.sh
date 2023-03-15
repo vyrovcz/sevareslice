@@ -40,13 +40,13 @@ touch testresults
 cd "$REPO_DIR"
 
 {
-    echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess"
+    echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess -h $ssl"
 
-    #if [ "$splitroles" == 0 ]; then
-        # compile experiment
-        /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
-    #fi
+    # set config and compile experiment
+    /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+        -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
+    
+    [ "$splitroles" == 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player"
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
@@ -108,10 +108,7 @@ if [ "$splitroles" == 0 ]; then
 else
     #doesn't work with /bin/time
     #/bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
-    ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
-
-    # wait until finished, the runs quit earlier
-    sleep 2s
+    /bin/time -f "$timerf" ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
     
     # calculate mean of 36 results
     sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
