@@ -145,7 +145,7 @@ In `host_scripts\measurement.sh`:
     ssl=$(pos_get_variable ssl --from-loop)
 ```
 
-- determine, if switch is a compile option or a runtime option and how it is used (in this case -h)
+- determine, if the switch is a compile option or a runtime option and how it is used (in this case -h)
 - Here, SSL is a compile option, add ("**-h "$ssl"**") to the compile parameters:
 
 ```
@@ -180,7 +180,7 @@ tail -fn 80 sevarelog_n1TEST
 less -S resultsMP-Slice/20xx-xx/xx_xx-xx-xx/data/Eslice_short_results.tsv
 ```
 
-Parsing of measurements table
+Parsing of measurements table.
 In `tools\sevare_parser.py`:
 - add the switch to the "switches_names"-array: ("**; h -> ssl**") and ("**, "ssl"**")
 
@@ -215,7 +215,7 @@ python3 tools/sevare_parser.py resultsMP-Slice/20xx-xx/xx_xx-xx-xx
 
 - and verifying that under `parsed/2D/x/` the correct plot files are being created
 
-Plotting the plot files
+Plotting the plot files.
 In `tools\sevare_plotter_tex.py`:
 - add the switch to the getConsString() function: ("**+ "ssl" + constellation["ssl"]**")
 
