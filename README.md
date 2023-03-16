@@ -315,6 +315,115 @@ root@zone:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' 
 for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip link set dev "$interface" up; done
 ```
 
+- For each node do the following, not all at once but step by step:
+- On node **algofi**: Verify that the routes are active by running
+
+```
+ip r | grep 10.10.10
+```
+
+- and checking if there is a **linkdown** printed for an interface. This would imply that there was no link recognized and the cable is missing.
+- delete the routes that have been automatically generated
+
+```
+for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip route del 10.10.10.0/24 dev "$interface" ; done
+```
+
+- manually add routes and send out pings for each interface
+
+```
+ip route add 10.10.10.0/24 dev enp193s0f1
+for i in 3 4 5; do ping -c 1 10.10.10."$i"; echo -e "####\n####\n####"; done
+output:
+
+PING 10.10.10.3 (10.10.10.3) 56(84) bytes of data.
+64 bytes from 10.10.10.3: icmp_seq=1 ttl=64 time=0.208 ms
+
+--- 10.10.10.3 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.208/0.208/0.208/0.000 ms
+####
+####
+####
+PING 10.10.10.4 (10.10.10.4) 56(84) bytes of data.
+From 10.10.10.2 icmp_seq=1 Destination Host Unreachable
+
+--- 10.10.10.4 ping statistics ---
+1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+
+####
+####
+####
+PING 10.10.10.5 (10.10.10.5) 56(84) bytes of data.
+From 10.10.10.2 icmp_seq=1 Destination Host Unreachable
+
+--- 10.10.10.5 ping statistics ---
+1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+
+####
+####
+####
+```
+
+- For ip .4 and ip .5 we get **Destination Host Unreachable**, that means interface **enp193s0f1** connects to ip .3 and therefore to **gard**
+- Move to the next interface
+
+```
+ip route del 10.10.10.0/24 dev enp193s0f1
+ip route add 10.10.10.0/24 dev enp195s0f0
+for i in 3 4 5; do ping -c 1 10.10.10."$i"; echo -e "####\n####\n####"; done
+output:
+
+PING 10.10.10.3 (10.10.10.3) 56(84) bytes of data.
+From 10.10.10.2 icmp_seq=1 Destination Host Unreachable
+
+--- 10.10.10.3 ping statistics ---
+1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+
+####
+####
+####
+PING 10.10.10.4 (10.10.10.4) 56(84) bytes of data.
+
+--- 10.10.10.4 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+####
+####
+####
+PING 10.10.10.5 (10.10.10.5) 56(84) bytes of data.
+From 10.10.10.2 icmp_seq=1 Destination Host Unreachable
+
+--- 10.10.10.5 ping statistics ---
+1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+
+####
+####
+####
+```
+
+- For ip .3 and ip .5 we get **Destination Host Unreachable**, that means interface **enp195s0f0** connects to ip .4 and therefore to **goracle**. Note that a ping can only be successfull, if the routes on the pinged host are correct. This was the case for algofi gard but not for algofi goracle. The ping cannot return as the routing table on goracle is still unconfigured. But the information that the ping timed out is enough to conclude which node is connected.
+- The last interface must connect to the last node, so **enp195s0f1** connects ip .5 or **zone**
+- Now repeat this step on the other nodes by adjusting the corresponding ip addresses in the ping-for-loop
+- add to the NIC0/1/2 labels the corresponding interface names in the graph picture and define the NIC labels in `global-variables.yml`
+
+```
+## testbedCoinbase NIC configuration
+# 25G
+algofiNIC0: enp193s0f1
+algofiNIC1: enp195s0f0
+algofiNIC2: enp195s0f1
+gardNIC0: enp195s0f0
+gardNIC1: enp195s0f1
+gardNIC2: enp193s0f1
+goracleNIC0: enp193s0f1
+goracleNIC1: enp195s0f1
+goracleNIC2: enp195s0f0
+zoneNIC0: enp195s0f1
+zoneNIC1: enp195s0f0
+zoneNIC2: enp193s0f1
+```
+
 
 #### Switch topology
 

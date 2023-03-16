@@ -43,6 +43,7 @@ installDriver() {
 
 nic0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
 nic1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || nic1=0
+nic2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || nic2=0
 
 ips=()
 
@@ -82,11 +83,11 @@ ips=()
 #### three nodes direct connection topology if true
 ###elif [ "$nic1" != 0 ]; then
 # four nodes direct connection topology if true
-if [ "$nic1" != 0 ] && [ "$groupsize" -eq 4 ]; then
+if [ "$nic1" != 0 ] && [ "$nic2" != 0 ]; then
 
 	# to achieve high speeds, install ddp drivers
-	[ "$(hostname | grep -cE "meld|tinyman|yieldly|gard|goracle|zone")" -eq 1 ] && \
-		installDriver
+	highspeed=$(hostname | grep -cE "idex|meld|tinyman|yieldly|algofi|gard|goracle|zone")
+	[ "$highspeed" -eq 1 ] && installDriver
 
 	# verify that nodes array is circularly sorted
 	# this is required for the definition of this topology
@@ -94,22 +95,27 @@ if [ "$nic1" != 0 ] && [ "$groupsize" -eq 4 ]; then
 	# specify the ip pair to create the network routes to
 	# it's not the ip that is being set to this host
 	[ "$ipaddr" -eq 2 ] && ips+=( 3 4 5 )
-	[ "$ipaddr" -eq 3 ] && ips+=( 4 2  )
-	[ "$ipaddr" -eq 4 ] && ips+=( 2 3 )
+	[ "$ipaddr" -eq 3 ] && ips+=( 4 2 3 )
+	[ "$ipaddr" -eq 4 ] && ips+=( 5 2 3 )
+	[ "$ipaddr" -eq 4 ] && ips+=( 2 3 4 )
 
 	ip addr add 10.10."$network"."$ipaddr"/24 dev "$nic0"
 	ip addr add 10.10."$network"."$ipaddr"/24 dev "$nic1"
+	ip addr add 10.10."$network"."$ipaddr"/24 dev "$nic2"
 
 	ip link set dev "$nic0" up
 	ip link set dev "$nic1" up
+	ip link set dev "$nic2" up
 
 	ip route add 10.10."$network"."${ips[0]}" dev "$nic0"
 	ip route add 10.10."$network"."${ips[1]}" dev "$nic1"
+	ip route add 10.10."$network"."${ips[2]}" dev "$nic2"
 
 	# to achieve high speeds, increase mtu
-	if [ "$(hostname | grep -cE "meld|tinyman|yieldly|gard|goracle|zone")" -eq 1 ]; then
+	if [ "$highspeed" -eq 1 ]; then
 		ip link set dev "$nic0" mtu 9700
 		ip link set dev "$nic1" mtu 9700
+		ip link set dev "$nic2" mtu 9700
 	fi
 
 # three nodes direct connection topology if true
