@@ -424,6 +424,8 @@ zoneNIC1: enp195s0f0
 zoneNIC2: enp193s0f1
 ```
 
+- Adjust `host_scripts\experiment-setup.sh` to represent the new situation.
+
 
 #### Switch topology
 

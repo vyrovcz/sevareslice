@@ -95,7 +95,7 @@ if [ "$nic1" != 0 ] && [ "$nic2" != 0 ]; then
 	# specify the ip pair to create the network routes to
 	# it's not the ip that is being set to this host
 	[ "$ipaddr" -eq 2 ] && ips+=( 3 4 5 )
-	[ "$ipaddr" -eq 3 ] && ips+=( 4 2 3 )
+	[ "$ipaddr" -eq 3 ] && ips+=( 4 5 2 )
 	[ "$ipaddr" -eq 4 ] && ips+=( 5 2 3 )
 	[ "$ipaddr" -eq 5 ] && ips+=( 2 3 4 )
 
