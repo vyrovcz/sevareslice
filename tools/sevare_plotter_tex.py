@@ -110,13 +110,14 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         indentor(file, 3, r"\legend{" + ', '.join([legenddict[key.split("/")[mode]] for key in plots ]) + "}")
         indentor(file, 2, r"\end{axis}")
         indentor(file, 1, r"\end{tikzpicture}")
-
+        # Plot information summary
         indentor(file, 1, r"\begin{itemize}")
         indentor(file, 1, r"\item Ref.Problem: Scalable Search")
         indentor(file, 1, r"\item Library: MP-Slice - " + name + " (" + legenddict[name.split(" ")[-1]] + ")")
         indentor(file, 1, r"\item Metric: " + get_name(exp_prefix).split("[")[0] + " - runtime")
         switchpositions = "Preprocessing: " + constellation["pre"] + ", Split Roles: " + constellation["split"]
         switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
+        switchpositions +=  ", SSL: " + constellation["ssl"]
         indentor(file, 1, r"\item Switches: " + switchpositions)
         indentor(file, 1, r"\item Specs: " + get_Specs(tex_name))
         indentor(file, 1, r"\end{itemize}")

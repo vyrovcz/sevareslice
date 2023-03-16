@@ -224,6 +224,15 @@ def getConsString(constellation):
     return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"] + "ssl" + constellation["ssl"]
 ```
 
+- add the switch to the plot information summary ("**", SSL: " + constellation["ssl"]**"):
+
+```
+        # Plot information summary
+        ...
+        switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
+        switchpositions +=  ", SSL: " + constellation["ssl"]
+```
+
 - add the switch to title page information by adding ("**, "SSL"**") to the capture array:
 
 ```
@@ -243,11 +252,68 @@ def getConsString(constellation):
 
 ### Add new testbed hosts
 
-#### Find out interface names
+#### Find out interface names - 4 interconnected nodes algofi,gard,goracle,zone
 
 In a well documented testbed, interface names are simply looked up in the topology overview.
 If, for some reason, the interface names are not documented, the following procedure can help to identify them:
 
+- Make a schematic representation depicting the node situation for better orientation, for example a graph with four nodes and each node connected to each other, resulting in 6 edges that will be labled with the interface card. For each node, 3 interfaces need to be determined, 12 in total.
+
+- The NICs are arranged circularly sorted, so that NIC0 is connected to the node alphabetically in sequence. (algofi: NIC0 -> gard, NIC1 -> goracle, NIC2 -> zone; or gard: NICO -> goracle, NIC1 -> zone, NIC2 -> algofi; or goracle: NIC0 -> zone, NIC1 -> algofi, NIC2 -> gard)
+
+- Reserve the nodes and reset them, using all four nodes. This will fail since interfaces are missing.
+
+```
+bash sevarebench.sh --config configs/testruns/basic.conf algofi,gard,goracle,zone &> sevarelog_gardTEST &
+```
+
+- Connect to each of the nodes and view the interfaces with
+
+```
+ip a
+```
+
+- Check the interfaces, if their name and speed information reveal them to be a candidate
+
+```
+root@algofi:~# apt install ethtool
+root@algofi:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1); do echo "$interface"; ethtool $interface | grep Speed; done
+lo
+eno1np0
+        Speed: 1000Mb/s
+eno2np1
+        Speed: 10000Mb/s
+enp193s0f0
+        Speed: 10000Mb/s
+enp193s0f1
+        Speed: 25000Mb/s
+enp195s0f0
+        Speed: 25000Mb/s
+enp195s0f1
+        Speed: 25000Mb/s
+usb0
+enp129s0f0np0
+        Speed: Unknown!
+enp129s0f1np1
+        Speed: Unknown!
+```
+
+- Since we are looking for 25000Mb/s Link Speed interfaces, the three candidates have been revealed to be enp193s0f1, enp195s0f0, enp195s0f1 for algofi. Repeat for the other 3 nodes.
+
+- Now that the interfaces have been determined, the next step is to find out which interfaces connects to which node. First, set the ip to the interfaces with
+
+```
+root@algofi:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip addr add 10.10.10.2/24 dev "$interface" ; done
+root@gard:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip addr add 10.10.10.3/24 dev "$interface" ; done
+root@goracle:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip addr add 10.10.10.4/24 dev "$interface" ; done
+root@zone:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip addr add 10.10.10.5/24 dev "$interface" ; done
+```
+
+- Note the ip address ending in .2 for the first node, .3 for the second, .4 the third, and .5 the fourth. Alphabetically sorted. Verify with ip a that ips have been set. Set interface link up
+
+```
+for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip link set dev "$interface" up; done
+```
 
 
 #### Switch topology
