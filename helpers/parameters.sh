@@ -33,10 +33,15 @@ help() {
     echo "     --dtype          set the datatype in bits (1,8,64,128,256)"
     # switches
     echo "     --preproc        activate/deactivate preprocessing"
-    echo "     --split          activate/deactivate split roles"
+    echo "     --split          activate/deactivate split roles, set type with 1 or 2 or 3"
+    echo "                      1 -> split-roles-3"
+    echo "                      2 -> split-roles-3to4"
+    echo "                      3 -> split-roles-4"
     echo "     --packbool       activate/deactivate pack booleans (--dtype 1 only)"
     echo "     --optshare       activate/deactivate optimized sharing"
     echo "     --ssl            activate/deactivate SSL encryption"
+    # variables
+    echo "     --threads        Number of parallel processes to use"
     echo "     --config         config files run with <path> as parameter, nodes can be given separatly"
     echo "                      allowed form: $0 --config file.conf [nodeA,...]"
     echo -e "\nManipulate Host Environment (optional)"

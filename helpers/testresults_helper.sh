@@ -84,7 +84,7 @@ exportExperimentResults() {
     # while we find a next loop info file do
     while [ -n "$loopinfo" ]; do
         loopvalues=""
-        # extract loop var values
+        # extract loop variables/switches values
         for value in $(jq -r 'values[]' "$loopinfo"); do
             loopvalues+="$value;"
         done
@@ -98,8 +98,6 @@ exportExperimentResults() {
             continue
         fi
 
-        ## Minimum result measurement information
-        ######
         # extract measurement
         compiletime=$(grep "Elapsed wall clock" "$runtimeinfo" | head -n 2 | tail -n 1 | cut -d ' ' -f 1)
         compilemaxRAMused=$(grep "Maximum resident" "$runtimeinfo" | head -n 2 | tail -n 1 | cut -d ' ' -f 1)
@@ -141,7 +139,7 @@ exportExperimentResults() {
         return
     fi
 
-    # create a tab separated table for pretty formating
+    # create a tab separated table for pretty formatting
     # convert .csv -> .tsv
     column -s ';' -t "$datatableShort" > "${datatableShort::-3}"tsv
     okfail ok "exported short and full results (${datatableShort::-3}tsv)"

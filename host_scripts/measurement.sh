@@ -14,7 +14,7 @@ set -x
 REPO_DIR=$(pos_get_variable repo_dir --from-global)
 REPO2_DIR=$(pos_get_variable repo2_dir --from-global)
 manipulate=$(pos_get_variable manipulate --from-global)
-# load loop variables
+# load loop variables/switches
 size=$(pos_get_variable input_size --from-loop)
 protocol=$(pos_get_variable protocol --from-loop)
 datatype=$(pos_get_variable datatype --from-loop)
@@ -23,6 +23,8 @@ splitroles=$(pos_get_variable splitroles --from-loop)
 packbool=$(pos_get_variable packbool --from-loop)
 optshare=$(pos_get_variable optshare --from-loop)
 ssl=$(pos_get_variable ssl --from-loop)
+#threads=$(pos_get_variable threads --from-loop)
+threads=1
 
 timerf="%M (Maximum resident set size in kbytes)\n\
 %e (Elapsed wall clock time in seconds)\n\
@@ -31,13 +33,27 @@ player=$1
 environ=""
 # test types to simulate changing environments like cpu frequency or network latency
 read -r -a types <<< "$2"
-network="$3"
+network=10.10."$3"
 partysize=$4
 # experiment type to allow small differences in experiments
 etype=$5
 touch testresults
 
 cd "$REPO_DIR"
+
+# different split role script, different ip definition...
+if [ "$splitroles" -lt 2 ]; then
+    # define ip addresses of the other party members
+    [ "$player" -eq 0 ] && ipA="$network".3 && ipB="$network".4
+    [ "$player" -eq 1 ] && ipA="$network".2 && ipB="$network".4
+    [ "$player" -eq 2 ] && ipA="$network".2 && ipB="$network".3
+else
+    # define all ips
+    ipA="$network".2
+    ipB="$network".3
+    ipC="$network".4
+    ipD="$network".5
+fi
 
 {
     echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess -h $ssl"
@@ -46,7 +62,9 @@ cd "$REPO_DIR"
     /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
         -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
     
-    [ "$splitroles" -eq 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player"
+    [ "$splitroles" -eq 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player" -a "$ipA" -b "$ipB"
+    [ "$splitroles" -eq 2 ] && ./Scripts/split-roles-3to4-compile.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD"
+    [ "$splitroles" -eq 3 ] && ./Scripts/split-roles-4-compile.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD"
     
     echo "$(du -BM search-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
@@ -97,34 +115,41 @@ success=true
 
 pos_sync --timeout 300
 
-# define ip addresses of the other party members
-[ "$player" -eq 0 ] && ipA=10.10."$network".3 && ipB=10.10."$network".4
-[ "$player" -eq 1 ] && ipA=10.10."$network".2 && ipB=10.10."$network".4
-[ "$player" -eq 2 ] && ipA=10.10."$network".2 && ipB=10.10."$network".3
-
 # run the SMC protocol
 if [ "$splitroles" -eq 0 ]; then
     /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
-else
-    #doesn't work with /bin/time
-    #/bin/time -f "$timerf" ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
-    /bin/time -f "$timerf" ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
-    
-    # calculate mean of 36 results
+elif [ "$splitroles" -eq 1 ]; then
+    /bin/time -f "$timerf" ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" -d &>> testresults || success=false
+elif [ "$splitroles" -eq 2 ]; then
+    /bin/time -f "$timerf" ./Scripts/split-roles-3to4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
+elif [ "$splitroles" -eq 3 ]; then
+    /bin/time -f "$timerf" ./Scripts/split-roles-4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
+fi
+
+# do calculations if splitroles is active
+if [ "$splitroles" -gt 0 ]; then
+
+    # 3nodes:   calculate mean of 6*j*6*j  results ( /6*j /6*j )
+    # 3-4nodes: calculate mean of 18*j*18*j results ( /18*j /18*j )
+    # 4nodes:   calculate mean of 24*j*24*j results ( /24*j /24*j )
+    [ "$splitroles" -eq 1 ] && divisor="6*6*$threads*$threads"
+    [ "$splitroles" -eq 2 ] && divisor="18*18*$threads*$threads"
+    [ "$splitroles" -eq 3 ] && divisor="24*24*$threads*$threads"
+
     sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 36" | bc -l)
+    average=$(echo "scale=6;$sum / $divisor" | bc -l)
     echo "Time measured to initialize program: ${average}s" &>> testresults
 
     sum=$(grep "computation clock" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 36" | bc -l)
+    average=$(echo "scale=6;$sum / $divisor" | bc -l)
     echo "Time measured to perform computation clock: ${average}s" &>> testresults
 
     sum=$(grep "computation getTime" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 36" | bc -l)
+    average=$(echo "scale=6;$sum / $divisor" | bc -l)
     echo "Time measured to perform computation getTime: ${average}s" &>> testresults
 
     sum=$(grep "computation chrono" testresults | cut -d 's' -f 2 | awk '{print $6}' | paste -s -d+ | bc)
-    average=$(echo "scale=6;$sum / 36" | bc -l)
+    average=$(echo "scale=6;$sum / $divisor" | bc -l)
     echo "Time measured to perform computation chrono: ${average}s" &>> testresults
 
 fi
