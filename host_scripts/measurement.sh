@@ -140,9 +140,9 @@ if [ "$splitroles" -gt 0 ]; then
     # 3nodes:   calculate mean of 6*j*6*j  results ( /6*j /6*j )
     # 3-4nodes: calculate mean of 18*j*18*j results ( /18*j /18*j )
     # 4nodes:   calculate mean of 24*j*24*j results ( /24*j /24*j )
-    [ "$splitroles" -eq 1 ] && divisor="6*6*$threads*$threads"
-    [ "$splitroles" -eq 2 ] && divisor="18*18*$threads*$threads"
-    [ "$splitroles" -eq 3 ] && divisor="24*24*$threads*$threads"
+    [ "$splitroles" -eq 1 ] && divisor=$((6*6*threads*threads))
+    [ "$splitroles" -eq 2 ] && divisor=$((18*18*threads*threads))
+    [ "$splitroles" -eq 3 ] && divisor=$((24*24*threads*threads))
 
     sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
     average=$(echo "scale=6;$sum / $divisor" | bc -l)
