@@ -35,12 +35,18 @@ raplaNIC1: enp130s0f0
 
 ## testbedCoinbase NIC configuration
 # 25G
+idexNIC0: ens7f0
+idexNIC1: ens7f1
+idexNIC2: ens4f1
 meldNIC0: ens4f1
-tinymanNIC1: ens4f1
-tinymanNIC0: ens7f0
-yieldlyNIC1: ens7f1
-yieldlyNIC0: ens7f0
 meldNIC1: ens7f0
+meldNIC2: ens7f1
+tinymanNIC0: ens7f0
+tinymanNIC1: ens7f1
+tinymanNIC2: ens4f1
+yieldlyNIC0: ens4f1
+yieldlyNIC1: ens7f0
+yieldlyNIC2: ens7f1
 
 ### 25G
 ##gardNIC0: enp194s0f0

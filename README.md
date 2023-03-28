@@ -261,7 +261,7 @@ If, for some reason, the interface names are not documented, the following proce
 
 - The NICs are arranged circularly sorted, so that NIC0 is connected to the node alphabetically in sequence. (algofi: NIC0 -> gard, NIC1 -> goracle, NIC2 -> zone; or gard: NICO -> goracle, NIC1 -> zone, NIC2 -> algofi; or goracle: NIC0 -> zone, NIC1 -> algofi, NIC2 -> gard)
 
-- Reserve the nodes and reset them, using all four nodes. This will fail since interfaces are missing.
+- Reserve the nodes and reset them, using all four nodes in alphabetical order. This will fail since interfaces are missing.
 
 ```
 bash sevarebench.sh --config configs/testruns/basic.conf algofi,gard,goracle,zone &> sevarelog_gardTEST &
