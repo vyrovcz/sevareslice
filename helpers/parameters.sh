@@ -90,7 +90,7 @@ runflags=""
 NODES=()
 
 # MP slice vars with default values
-DATATYPE=( 8 )
+DATATYPE=( 64 )
 PROTOCOL=( 2 )
 PREPROCESS=( 0 )
 SPLITROLES=( 0 )

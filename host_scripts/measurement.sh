@@ -42,7 +42,7 @@ touch testresults
 cd "$REPO_DIR"
 
 # different split role script, different ip definition...
-if [ "$splitroles" -lt 2 ]; then
+if [ "$splitroles" -lt 2 ] || [ "$protocol" -gt 6 ]; then
     # define ip addresses of the other party members
     [ "$player" -eq 0 ] && ipA="$network".3 && ipB="$network".4
     [ "$player" -eq 1 ] && ipA="$network".2 && ipB="$network".4
@@ -124,7 +124,7 @@ pos_sync --timeout 300
 # run the SMC protocol
                               # skip 4th node here
 if [ "$splitroles" -eq 0 ] && [ "$player" -lt 3 ]; then
-    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
+    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" "$ipC" &>> testresults || success=false
                                 # skip 4th node here
 elif [ "$splitroles" -eq 1 ] && [ "$player" -lt 3 ]; then
     /bin/time -f "$timerf" ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
