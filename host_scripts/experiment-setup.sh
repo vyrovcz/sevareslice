@@ -35,7 +35,6 @@ installDriver() {
 	modprobe ice
 }
 
-
 # If the testnodes are directly connected from NIC to NIC and
 # not via a switch, we need to create individual networks for each
 # NIC pair and route the network through the correct NIC
