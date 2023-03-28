@@ -61,11 +61,11 @@ fi
     # set config and compile experiment
     if [ "$splitroles" -eq 0 ]; then
         /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 6000
     else
         # with splitroles active, "-p 3" would through error. Omit -p as unneeded
         /bin/time -f "$timerf" ./Scripts/config.sh -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 6000
     fi
     
     [ "$splitroles" -eq 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player" -a "$ipA" -b "$ipB"

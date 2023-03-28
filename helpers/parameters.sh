@@ -24,6 +24,7 @@ help() {
     echo "       [...,<valuei>,]<start>,<next>,...,<stop>[,valuek,...], with increment steps <next>-<start>"
     echo -e "\nOptions (mandatory)"
     echo " -n, --nodes          nodes to run the experiment on of the form <node1>[,<node2>,...]"
+    echo " -p, --protocols      protocols , with <Values>"
     echo " -i, --input          input sizes, with <Values>"
     echo -e "\nOptions (optional)"
     #echo "     --etype          experiment type, if applicable, specified with a code"
@@ -34,7 +35,7 @@ help() {
     # switches
     echo "     --preproc        activate/deactivate preprocessing"
     echo "     --split          activate/deactivate split roles, set type with 1 or 2 or 3"
-    echo "                      1 -> split-roles-3"
+    echo "                      1 -> split-roles-3 (only )"
     echo "                      2 -> split-roles-3to4"
     echo "                      3 -> split-roles-4"
     echo "     --packbool       activate/deactivate pack booleans (--dtype 1 only)"
