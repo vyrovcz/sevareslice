@@ -124,7 +124,7 @@ pos_sync --timeout 300
 # run the SMC protocol
                               # skip 4th node here
 if [ "$splitroles" -eq 0 ] && [ "$player" -lt 3 ]; then
-    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" "$ipC" &>> testresults || success=false
+    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
                                 # skip 4th node here
 elif [ "$splitroles" -eq 1 ] && [ "$player" -lt 3 ]; then
     /bin/time -f "$timerf" ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
