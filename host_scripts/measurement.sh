@@ -42,7 +42,7 @@ touch testresults
 cd "$REPO_DIR"
 
 # different split role script, different ip definition...
-if [ "$splitroles" -lt 2 ] || [ "$protocol" -gt 6 ]; then
+if [ "$splitroles" -lt 2 ]; then
     # define ip addresses of the other party members
     [ "$player" -eq 0 ] && ipA="$network".3 && ipB="$network".4
     [ "$player" -eq 1 ] && ipA="$network".2 && ipB="$network".4
@@ -59,7 +59,7 @@ fi
     echo "./Scripts/config.sh -p $player -n $size -d $datatype -s $protocol -e $preprocess -h $ssl"
 
     # set config and compile experiment
-    if [ "$splitroles" -eq 0 ]; then
+    if [ "$splitroles" -eq 0 ] || [ "$player" -lt 3 ]; then
         /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
             -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 6000
     else

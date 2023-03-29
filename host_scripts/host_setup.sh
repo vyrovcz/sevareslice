@@ -53,8 +53,8 @@ cd "$REPO_DIR"
 git checkout experimental
 
 # adjust script to specific needs
-#echo "wait" >> Scripts/split-roles-3-execute.sh
-#echo "wait" >> ./Scripts/split-roles-3to4-execute.sh
-#echo "wait" >> ./Scripts/split-roles-4-execute.sh
+echo "wait" >> Scripts/split-roles-3-execute.sh
+echo "wait" >> ./Scripts/split-roles-3to4-execute.sh
+echo "wait" >> ./Scripts/split-roles-4-execute.sh
 
 echo "global setup successful"
