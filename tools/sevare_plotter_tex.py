@@ -15,8 +15,8 @@ import glob
 colors = ['blue', 'red', 'orange', 'green', 'cyan', 'black']
 nodehardware = {}
 nodehardware.update({node: "Intel D-1518(2.2GHz) 32GiB 1Gbits" for node in ["dogecoin", "bitcoin", "ether", "todd", "rod", "ned"]})
-nodehardware.update({node: "AMD 7543(2.8GHz) 512GiB 25Gbits" for node in ["gard", "goracle", "zone"]})
-nodehardware.update({node: "Intel 6312U(2.4GHz) 512GiB 25Gbits" for node in ["meld", "yieldly", "tinyman"]})
+nodehardware.update({node: "AMD 7543(2.8GHz) 512GiB 25Gbits" for node in ["algofi", "gard", "goracle", "zone"]})
+nodehardware.update({node: "Intel 6312U(2.4GHz) 512GiB 25Gbits" for node in ["idex", "meld", "yieldly", "tinyman"]})
 
 legenddict = {
     "1": "Sharemind",
@@ -25,6 +25,9 @@ legenddict = {
     "4": "OEC DUP",
     "5": "OEC REP",
     "6": "TTP",
+    "7": "7",
+    "8": "8",
+    "9": "9",
     "d1": "bool",
     "d8": "char",
     "d64": "uint64",
@@ -369,15 +372,19 @@ except subprocess.TimeoutExpired:
 else:
     dateid = sevaredir.split("/")[-3][2:] + "-" + sevaredir.split("/")[-2][:-3]
     cpumodel = nodehardware[node].split(" ")[1].split("(")[0]
+
     positions = {}
     # add switch positions to the filename
     for switch in ["pre", "split", "pack", "opt", "ssl"]:
         for constellation in constellations:
             if switch in positions:
-                if constellation[switch] != positions[switch]:
-                    positions[switch] = "2"
+                if constellation[switch] not in positions[switch]:
+                    positions[switch] += constellation[switch]
             else:
                 positions[switch] = constellation[switch]
+    # sort the switch positions for uniformity
+    for switch, position in positions.items():
+        positions.update({switch: ''.join(sorted(position))})
 
     switches = "_" + getConsString(positions).replace("2", "01")
     pdfname = dateid + "_" + manipulations + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
