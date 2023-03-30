@@ -319,7 +319,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
         # Only add frame, if information actually exists
         if line:
-            indentor(file, 1, r"\begin{frame}")
+            indentor(file, 1, r"\begin{frame}[allowframebreaks]")
             indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
             indentor(file, 2, r"\begin{multicols}{2}")
             indentor(file, 2, r"Experiment Networking Information\\")
@@ -327,7 +327,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             speeds = []
             for line in f:
                 # simply copy the info lines from summary to document
-                indentor(file, 2, line.strip() + r"\\" if line != '\n' else r"\columnbreak")
+                indentor(file, 2, line.strip() + r"\\" if line != '\n' else r"\framebreak")
                 # find the measured speeds to add to the filename
                 match = re.search(regex, line)
                 if match:
@@ -340,7 +340,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             indentor(file, 1, r"\end{frame}")
 
     # Table of Contents page
-    indentor(file, 1, r"\begin{frame}{Outline}\fontsize{5pt}{7pt}\selectfont\tableofcontents\end{frame}" + "\n")
+    indentor(file, 1, r"\begin{frame}[allowframebreaks]{Outline}\fontsize{5pt}{7pt}\selectfont\tableofcontents\end{frame}" + "\n")
 
     # add all the plots
     for dir in sorted(os.listdir(sevaredir + "plotted/include")):
