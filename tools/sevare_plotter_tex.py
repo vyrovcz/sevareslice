@@ -276,7 +276,6 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 0, r"\setbeamertemplate{itemize item}{$-$}")
     indentor(file, 0, r"\usepackage{pgf}")
     indentor(file, 0, r"\usepackage{pgfplots}")
-    indentor(file, 0, r"\usepackage{multicol}")
     indentor(file, 0, r"\pgfplotsset{compat=newest}")
     indentor(file, 0, r"\setbeamertemplate{itemize/enumerate body begin}{\small}")
     indentor(file, 0, r"\title{Sevarebench Measurement Results}")
@@ -321,7 +320,6 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
         if line:
             indentor(file, 1, r"\begin{frame}[allowframebreaks]")
             indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
-            indentor(file, 2, r"\begin{multicols}{2}")
             indentor(file, 2, r"Experiment Networking Information\\")
             regex = r"total (sender|receiver) speed: ([0-9]+\.[0-9]+) Gbits/sec"
             speeds = []
@@ -336,7 +334,6 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
             if len(speeds) > 0:
                 minspeed = "_" + str(min(speeds)).split(".")[0] + "Gbs"
-            indentor(file, 2, r"\end{multicols}")
             indentor(file, 1, r"\end{frame}")
 
     # Table of Contents page
