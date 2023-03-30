@@ -84,10 +84,11 @@ getlastoutput() {
   filename=$(find "$RPATH/${NODES[0]}/" -name "*testresults*" -print | tail -n 1)
   if [ -f "$filename" ]; then
     echo "  filename: $filename"
-    echo -e "  Last protocol run printed:\n"
+    echo -e "\n  Last protocol run printed:\n"
     cat "$filename"
     echo
-    # get last three loop variables constellation
+    # get last three loop variables constellations
+    echo -e "  Last three loop variables constellations:\n"
     for file in $(find "$RPATH/${NODES[0]}/" -name "*loop*" -print | tail -n 3); do 
       cat "$file"
       echo 
