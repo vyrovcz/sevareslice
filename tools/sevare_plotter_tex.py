@@ -43,7 +43,7 @@ def get_Specs(path):
             match = re.search(r"Nodes.*", line)
             if match:
                 node = match.group(0).split(" ")[2]
-                return node + nodehardware[node]
+                return node + " " + nodehardware[node]
 
 # Is used to generate the axis labels of plots
 def get_name(prefix_):
@@ -176,7 +176,7 @@ for plot in plots:
     datatypes.append(plot.split("_")[0]) if plot.split("_")[0] != "dall" else None
     prefixes.append(plot.split("_")[1])
     constellation = {}
-    for switch, position in re.findall(r'([A-Za-z]+)([01])', plot.split("_")[2][:-4]):
+    for switch, position in re.findall(r'([A-Za-z]+)([0123456789])', plot.split("_")[2][:-4]):
         constellation[switch] = position
     constellations.append(constellation)
 
@@ -202,11 +202,11 @@ with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
             maxdtype = max(numbers)   
 
 print()
-print(datatypes)
-print(prefixes)
+print("Recognized datatypes: ", datatypes)
+print("Recognized prefixes: ", prefixes)
 #print(constellations)
 #print(getConsString(constellations[0]))
-print(protocols)
+print("Recognized protocols: ", protocols)
 #print(plots)
 print()
 
@@ -228,7 +228,7 @@ for constellation in constellations:
         plots = [protocol + "/" + datatype for datatype in datatypes]
         savepath = "plotted/include/02input/01s" + protocol + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
-        print("- generated: " + savepath)
+        print(" generated " + savepath)
 
 # datatype view
 for constellation in constellations:
@@ -236,7 +236,7 @@ for constellation in constellations:
         plots = [protocol + "/" + datatype for protocol in protocols]
         savepath = "plotted/include/02input/0" + str(i) + datatype + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Datatype -d " + datatype, constellation)
-        print("- generated: " + savepath)
+        print(" generated " + savepath)
 
 os.mkdir(sevaredir + "plotted/include/01manipulations")
 
@@ -252,7 +252,7 @@ for i,prefix in enumerate(["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
         savepath = "plotted/include/01manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
-        print("- generated: " + savepath)
+        print(" generated " + savepath)
 
 manipulations = manipulations or "Inp_"
 
@@ -261,7 +261,7 @@ for constellation in constellations:
     plots = [protocol + "/dall" for protocol in protocols]
     savepath = "plotted/include/01manipulations/09dall" + "_" + getConsString(constellation) + ".tex"
     genTex(sevaredir + savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " all", constellation)
-    print("- generated: " + savepath)
+    print(" generated " + savepath)
 
 ### build main tex file
 node = ""
@@ -386,7 +386,7 @@ else:
     for switch, position in positions.items():
         positions.update({switch: ''.join(sorted(position))})
 
-    switches = "_" + getConsString(positions).replace("2", "01")
+    switches = "_" + getConsString(positions)
     pdfname = dateid + "_" + manipulations + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
     print("Latex Built success:")
     print("    " + sevaredir + pdfname)

@@ -134,6 +134,8 @@ elif [ "$splitroles" -eq 3 ]; then
     /bin/time -f "$timerf" timeout 300s ./Scripts/split-roles-4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
 fi
 
+# divide external runtime x*j
+
 # do calculations if splitroles is active
 if [ "$splitroles" -gt 0 ]; then
 
