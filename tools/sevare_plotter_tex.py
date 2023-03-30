@@ -101,7 +101,7 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
 
         for g in range(len(plots)):
             plotpath = "../parsed/2D/"  + plots[g] + "_" + exp_prefix + getConsString(constellation) + ".txt"
-            print("    " + plotpath)
+            #print("    " + plotpath)
             divisor = plots[g].split("/")[1][1:]
             # this is for the special case where x axis shows the datatype bits, need to divide each y value by the x value
             divisor = divisor if divisor != "all" else r"\thisrowno{0}"
@@ -204,10 +204,10 @@ with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
 print()
 print(datatypes)
 print(prefixes)
-print(constellations)
-print(getConsString(constellations[0]))
+#print(constellations)
+#print(getConsString(constellations[0]))
 print(protocols)
-print(plots)
+#print(plots)
 print()
 
 # generate .tex files into an "include" folder
@@ -228,7 +228,7 @@ for constellation in constellations:
         plots = [protocol + "/" + datatype for datatype in datatypes]
         savepath = "plotted/include/02input/01s" + protocol + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
-        print("- saved: " + savepath)
+        print("- generated: " + savepath)
 
 # datatype view
 for constellation in constellations:
@@ -236,7 +236,7 @@ for constellation in constellations:
         plots = [protocol + "/" + datatype for protocol in protocols]
         savepath = "plotted/include/02input/0" + str(i) + datatype + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Datatype -d " + datatype, constellation)
-        print("- saved: " + savepath)
+        print("- generated: " + savepath)
 
 os.mkdir(sevaredir + "plotted/include/01manipulations")
 
@@ -252,7 +252,7 @@ for i,prefix in enumerate(["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
         savepath = "plotted/include/01manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
-        print("- saved: " + savepath)
+        print("- generated: " + savepath)
 
 manipulations = manipulations or "Inp_"
 
@@ -261,7 +261,7 @@ for constellation in constellations:
     plots = [protocol + "/dall" for protocol in protocols]
     savepath = "plotted/include/01manipulations/09dall" + "_" + getConsString(constellation) + ".tex"
     genTex(sevaredir + savepath, "Dtp_", plots, "Fixed Input: " + str(maxinput) + " all", constellation)
-    print("- saved: " + savepath)
+    print("- generated: " + savepath)
 
 ### build main tex file
 node = ""
