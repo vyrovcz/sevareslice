@@ -181,7 +181,7 @@ disown %-
 tail -fn 80 sevarelog_n1TEST
 ```
 
-- and verify if exported data looks good
+- and verify that exported data looks good
 
 ```
 less -S resultsMP-Slice/20xx-xx/xx_xx-xx-xx/data/Eslice_short_results.tsv
@@ -240,7 +240,7 @@ def getConsString(constellation):
         switchpositions +=  ", SSL: " + constellation["ssl"]
 ```
 
-- add the switch to title page information by adding ("**, "SSL"**") to the capture array:
+- add the switch to the title page information by adding ("**, "SSL"**") to the capture array:
 
 ```
     # title page information
@@ -361,20 +361,60 @@ disown %-
 tail -fn 80 sevarelog_n1TEST
 ```
 
-- and verify if exported data looks good
+- and verify that exported data looks good
 
 ```
 less -S resultsMP-Slice/20xx-xx/xx_xx-xx-xx/data/Eslice_short_results.tsv
-``
+```
 
+Parsing of measurements table.
+In `tools\sevare_parser.py`:
+- add the variable to the "variable_array" and "var_name_array". Think of a creative 3-chars abbreviation, here "Thd" for threads. Note that the entries must have the same index in both arrays.
 
+```
+# datatype and inputsize must stay at position [0] and [-1] to work, add new vars inbetween
+variable_array = ["datatype", "threads"] # Adaptions
+...
+var_name_array = ["Dtp_", "Thd_"] # Adaptions
+```
 
+- confirm the parsing works by running
 
+```
+python3 tools/sevare_parser.py resultsMP-Slice/20xx-xx/xx_xx-xx-xx
+```
 
+- and verifying that under `parsed/2D/x/` the correct plot files are being created
 
+Plotting the plot files.
+In `tools\sevare_plotter_tex.py`:
+- add the variable to the arrays in get_name(prefix_): function. Again, note that the entries must have the same index in both arrays.
 
+```
+def get_name(prefix_):
+    prefix_names = ["Datatype [bits]", "Threads"] # Adaptions
+    ...
+    prefixes_ = ["Dtp_", "Thd_"] # Adaptions
+```
 
+- add the variable to the fixed input views
 
+```
+## fixed input views
+######
+# other manipulations
+manipulations = ""
+for i,prefix in enumerate(["Thd_", "Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
+```
+
+- add the variable to the title page information by adding ("**, "THREADS"**") to the capture array:
+
+```
+    # title page information
+    capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
+        "SplitRoles", "Pack", "Optimized", "SSL", "THREADS", "CPUS", "QUOTAS", "FREQS", "RAM",
+        "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
+```
 
 ### Add new testbed hosts
 
@@ -441,8 +481,7 @@ root@zone:~# for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' 
 for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip link set dev "$interface" up; done
 ```
 
-- For each node do the following, not all at once but step by step:
-- On node **algofi**: Verify that the routes are active by running
+- Verify on the nodes that the routes are active by running
 
 ```
 ip r | grep 10.10.10
@@ -455,7 +494,8 @@ ip r | grep 10.10.10
 for interface in $(ip a | grep mtu | awk '{print $2}' | cut -d ':' -f 1);do [ $(ethtool $interface | grep -c 25000Mb) -gt 0 ] && echo "$interface" && ip route del 10.10.10.0/24 dev "$interface" ; done
 ```
 
-- manually add routes and send out pings for each interface
+- For each node do the following, not all at once but step by step:
+- On node **algofi**, manually add routes and send out pings for each interface
 
 ```
 ip route add 10.10.10.0/24 dev enp193s0f1
@@ -528,7 +568,7 @@ From 10.10.10.2 icmp_seq=1 Destination Host Unreachable
 ####
 ```
 
-- For ip .3 and ip .5 we get **Destination Host Unreachable**, that means interface **enp195s0f0** connects to ip .4 and therefore to **goracle**. Note that a ping can only be successfull, if the routes on the pinged host are correct. This was the case for algofi gard but not for algofi goracle. The ping cannot return as the routing table on goracle is still unconfigured. But the information that the ping timed out is enough to conclude which node is connected.
+- For ip .3 and ip .5 we get **Destination Host Unreachable**, that means interface **enp195s0f0** connects to ip .4 and therefore to **goracle**. Note that a ping can only return and be successfull, if the routes on the pinged host are correct. This was the case for algofi gard but not for algofi goracle. The ping cannot return as the routing table on goracle is still unconfigured. But the information that the ping timed out is enough to conclude which node is connected.
 - The last interface must connect to the last node, so **enp195s0f1** connects ip .5 or **zone**
 - Now repeat this step on the other nodes by adjusting the corresponding ip addresses in the ping-for-loop
 - add to the NIC0/1/2 labels the corresponding interface names in the graph picture and define the NIC labels in `global-variables.yml`

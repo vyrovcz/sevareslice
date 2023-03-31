@@ -23,7 +23,7 @@ import subprocess
 
 # ----- ARGUMENTS --------
 parser = argparse.ArgumentParser(
-    description='This program parses the measurement folder outputted by sevare-bench (version from 11/22).')
+    description='This program parses the measurement folder outputted by sevareslice (version from 03/23).')
 
 parser.add_argument('data_dir', type=str, help='Required, testresults dir to parse.')
 parser.add_argument('-s', type=str, help='(Optional) Sort table by <parameter> (3D parsing)')
@@ -75,10 +75,10 @@ comm_rounds_index = -1
 data_sent_index = -1
 
 # datatype and inputsize must stay at position [0] and [-1] to work, add new vars inbetween
-variable_array = ["datatype"] # Adaptions
+variable_array = ["datatype", "threads"] # Adaptions
 variable_array += ["latencies(ms)", "bandwidths(Mbs)", "packetdrops(%)", "freqs(GHz)", "quotas(%)", "cpus", "input_size"]  # Names from the table!
-var_name_array = ["Dtp_"] # Adaptions
-var_name_array += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # HAS TO MATCH ABOVE ARRAY
+var_name_array = ["Dtp_", "Thd_"] # Adaptions
+var_name_array += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # INDICES HAVE TO MATCH ABOVE ARRAY
 var_val_array = [None] * len(variable_array)  # used to store changing variables
 index_array = [-1] * len(variable_array)
 datafile_array = [None] * len(variable_array)

@@ -47,10 +47,10 @@ def get_Specs(path):
 
 # Is used to generate the axis labels of plots
 def get_name(prefix_):
-    prefix_names = ["Datatype [bits]"] # Adaptions
+    prefix_names = ["Datatype [bits]", "Threads"] # Adaptions
     prefix_names += ["Latency [ms]", "Bandwidths [Mbit/s]", "Packet Loss [%]", "Frequency [GHz]", "Quotas [%]",
                     "CPU Threads", "Input Size"]  # Axis names
-    prefixes_ = ["Dtp_"] # Adaptions
+    prefixes_ = ["Dtp_", "Thd_"] # Adaptions
     prefixes_ += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]
 
     if prefix_ in prefixes_:
@@ -244,7 +244,7 @@ os.mkdir(sevaredir + "plotted/include/01manipulations")
 ######
 # other manipulations
 manipulations = ""
-for i,prefix in enumerate(["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
+for i,prefix in enumerate(["Thd_", "Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
     if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
         continue
     manipulations += prefix
@@ -288,7 +288,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
     # title page information
     capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
-        "SplitRoles", "Pack", "Optimized", "SSL", "CPUS", "QUOTAS", "FREQS", "RAM",
+        "SplitRoles", "Pack", "Optimized", "SSL", "THREADS", "CPUS", "QUOTAS", "FREQS", "RAM",
         "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
     with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
         for line in f:
