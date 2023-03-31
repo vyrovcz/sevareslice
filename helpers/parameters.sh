@@ -35,9 +35,9 @@ help() {
     # switches
     echo "     --preproc        activate/deactivate preprocessing"
     echo "     --split          activate/deactivate split roles, set type with 1 or 2 or 3"
-    echo "                      1 -> split-roles-3 (only )"
+    echo "                      1 -> split-roles-3"
     echo "                      2 -> split-roles-3to4"
-    echo "                      3 -> split-roles-4"
+    echo "                      3 -> split-roles-4 (only with -p > 6)"
     echo "     --packbool       activate/deactivate pack booleans (--dtype 1 only)"
     echo "     --optshare       activate/deactivate optimized sharing"
     echo "     --ssl            activate/deactivate SSL encryption"
@@ -97,6 +97,7 @@ SPLITROLES=( 0 )
 PACKBOOL=( 0 )
 OPTSHARE=( 1 )
 SSL=( 1 )
+THREADS=( 1 )
 manipulate=""
 
 INPUTS=( 4096 )
@@ -130,7 +131,7 @@ setParameters() {
     LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:
     LONG+=,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:
     LONG+=,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:
-    LONG+=,split:,packbool:,optshare:,ssl:,manipulate:
+    LONG+=,split:,packbool:,optshare:,ssl:,threads:,manipulate:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -186,10 +187,13 @@ setParameters() {
                 shift;;
             --ssl)
                 setArray SSL "$2"
-                shift;;                
+                shift;; 
+            --threads)
+                setArray THREADS "$2"
+                shift;;
             --manipulate)
                 manipulate="$2"
-                shift;;                
+                shift;;
             # Host environment manipulation
             -c|--cpu)
                 TTYPES+=( CPUS )
@@ -247,7 +251,7 @@ setParameters() {
     rm -f "$loopvarpath"
     # Config Vars
     configvars=( OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE )
-    configvars+=( SSL )
+    configvars+=( SSL THREADS )
     for type in "${configvars[@]}"; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
@@ -284,6 +288,7 @@ setParameters() {
         echo "    Pack Bool: ${PACKBOOL[*]}"
         echo "    Optimized Sharing: ${OPTSHARE[*]}"
         echo "    SSL: ${SSL[*]}"
+        echo "    THREADS: ${THREADS[*]}"
         echo "    Testtypes:"
         for type in "${TTYPES[@]}"; do
             declare -n ttypes="${type}"

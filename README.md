@@ -87,7 +87,7 @@ In `helpers\parameters.sh`:
     echo "     --ssl            activate/deactivate SSL encryption"
 ```
 
-- add an array variable in the variable definition and load it with a default value:
+- add an array variable in the variables definition and load it with a default value:
 
 ```
 # MP slice vars with default values
@@ -96,7 +96,7 @@ OPTSHARE=( 1 )
 SSL=( 1 )
 ```
 
-- function `setParameters()`, add an option flag ("**,ssl:**") for the switch:
+- in function `setParameters()`, add an option flag ("**,ssl:**") for the switch:
 
 ```
     # define the flags for the parameters
@@ -150,9 +150,15 @@ In `host_scripts\measurement.sh`:
 - Here, SSL is a compile option, add ("**-h "$ssl"**") to the compile parameters:
 
 ```
-        # compile experiment
-        /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl"
+        # set config and compile experiment
+        if [ "$splitroles" -eq 0 ]; then
+            /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+                -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000
+        else
+            # with splitroles active, "-p 3" would through error. Omit -p as unneeded
+            /bin/time -f "$timerf" ./Scripts/config.sh -n "$size" -d "$datatype" \
+                -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000
+        fi
 ```
 
 - Assuming it is a runtime option and **not a compile option** (don't do both), add here:
@@ -170,7 +176,7 @@ Verify functionality:
 - by running a test using the new flag
 
 ```
-bash sevarebench.sh --protocols 1,2,...,6 --nodes n1,n2,n3 --dtype 128 --ssl 0,1 --split 0,1 --input 4096,8192,...,40960 &>> sevarelog_n1TEST &
+bash sevarebench.sh --protocols 1,2,...,6 --nodes n1,n2,n3 --dtype 128 --ssl 0,1 --input 4096,40960 &>> sevarelog_n1TEST &
 disown %-
 tail -fn 80 sevarelog_n1TEST
 ```
@@ -253,6 +259,122 @@ def getConsString(constellation):
 #### Variable
 
 Variables assume many different values, like environment manipulation variables like bandwidth, where the metrics can show interesting behavior to different situations
+To implement a new variable, code has to be added in various places. The following guides through the steps to add the variable "threads", that holds values to set the number of threads a smc run can use.
+
+In `helpers\parameters.sh`:
+- function `help()`, add a meaningful help entry:
+
+```
+    # variables
+    echo "     --threads        Number of parallel processes to use"
+```
+
+- add an array variable in the variables definition and load it with a default value:
+
+```
+# MP slice vars with default values
+...
+OPTSHARE=( 1 )
+SSL=( 1 )
+THREADS=( 1 )
+```
+
+- in function `setParameters()`, add an option flag ("**,threads:**") for the variable:
+
+```
+    # define the flags for the parameters
+    ...
+    LONG+=,split:,packbool:,optshare:,ssl:,threads:,manipulate:
+```
+
+- and add a case statement to handle the new option:
+
+```
+    while [ $# -gt 1 ]; do
+        case "$1" in
+            ...
+            # MP-Slice args
+            ...
+            --threads)
+                setArray THREADS "$2"
+                shift;;
+```
+
+- load the new variable to the loop variable file:
+
+```
+    # generate loop-variables.yml (append random num to mitigate conflicts)
+    ...
+    # Config Vars
+    ...
+    configvars+=( SSL THREADS )
+```
+
+- add a line to the experiment summary information file:
+
+```
+    # Experiment run summary information output
+    ...
+    echo "    Optimized Sharing: ${OPTSHARE[*]}"
+    echo "    SSL: ${SSL[*]}"
+    echo "    THREADS: ${THREADS[*]}"
+```
+
+In `host_scripts\measurement.sh`:
+- load the values for the experiment loops, referring to the parameters.sh variable name ("**SSL**") in lowercase:
+
+```
+    # load loop variables
+    ...
+    optshare=$(pos_get_variable optshare --from-loop)
+    ssl=$(pos_get_variable ssl --from-loop)
+    threads=$(pos_get_variable threads --from-loop)
+```
+
+- determine, if the variable is a compile option or a runtime option and how it is used (in this case -h)
+- Here, THREADS is a compile option, add ("**-j "$threads"**") to the compile parameters:
+
+```
+        # set config and compile experiment
+        /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000 \
+            -j "$threads"
+```
+
+- Assuming it is a runtime option and **not a compile option** (don't do both), add here:
+
+```
+# run the SMC protocol
+if [ "$splitroles" == 0 ]; then
+    /bin/time -f "$timerf" ./search-P"$player".o "$ipA" "$ipB" -j "$threads" &>> testresults || success=false
+else
+    ...
+    ./Scripts/split-roles.sh -p "$player" -a "$ipA" -b "$ipB" -j "$threads" &>> testresults || success=false
+```
+
+Verify functionality:
+- by running a test using the new flag
+
+```
+bash sevarebench.sh --protocols 1,2,...,6 --nodes n1,n2,n3 --dtype 128 --threads 1,2,4,8 --input 4096,40960 &>> sevarelog_n1TEST &
+disown %-
+tail -fn 80 sevarelog_n1TEST
+```
+
+- and verify if exported data looks good
+
+```
+less -S resultsMP-Slice/20xx-xx/xx_xx-xx-xx/data/Eslice_short_results.tsv
+``
+
+
+
+
+
+
+
+
+
 
 ### Add new testbed hosts
 

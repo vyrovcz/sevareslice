@@ -23,8 +23,7 @@ splitroles=$(pos_get_variable splitroles --from-loop)
 packbool=$(pos_get_variable packbool --from-loop)
 optshare=$(pos_get_variable optshare --from-loop)
 ssl=$(pos_get_variable ssl --from-loop)
-#threads=$(pos_get_variable threads --from-loop)
-threads=1
+threads=$(pos_get_variable threads --from-loop)
 
 timerf="%M (Maximum resident set size in kbytes)\n\
 %e (Elapsed wall clock time in seconds)\n\
@@ -61,11 +60,13 @@ fi
     # set config and compile experiment
     if [ "$splitroles" -eq 0 ]; then
         /bin/time -f "$timerf" ./Scripts/config.sh -p "$player" -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000 \
+            -j "$threads"
     else
         # with splitroles active, "-p 3" would through error. Omit -p as unneeded
         /bin/time -f "$timerf" ./Scripts/config.sh -n "$size" -d "$datatype" \
-            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000
+            -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000 \
+            -j "$threads"
     fi
     
     [ "$splitroles" -eq 1 ] && ./Scripts/split-roles-3-compile.sh -p "$player" -a "$ipA" -b "$ipB"
