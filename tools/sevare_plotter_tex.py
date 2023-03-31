@@ -115,6 +115,7 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         indentor(file, 1, r"\end{tikzpicture}")
         # Plot information summary
         indentor(file, 1, r"\begin{itemize}")
+        indentor(file, 1, r"\fontsize{6pt}{8pt}\selectfont")
         indentor(file, 1, r"\item Ref.Problem: Scalable Search")
         indentor(file, 1, r"\item Library: MP-Slice - " + name + " (" + legenddict[name.split(" ")[-1]] + ")")
         indentor(file, 1, r"\item Metric: " + get_name(exp_prefix).split("[")[0] + " - runtime")
