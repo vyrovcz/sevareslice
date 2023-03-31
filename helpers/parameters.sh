@@ -41,6 +41,7 @@ help() {
     echo "     --packbool       activate/deactivate pack booleans (--dtype 1 only)"
     echo "     --optshare       activate/deactivate optimized sharing"
     echo "     --ssl            activate/deactivate SSL encryption"
+    echo "     --function       Function Identifier (0: Search, 2: AND, ...)"
     # variables
     echo "     --threads        Number of parallel processes to use"
     echo "     --config         config files run with <path> as parameter, nodes can be given separatly"
@@ -98,6 +99,7 @@ PACKBOOL=( 0 )
 OPTSHARE=( 1 )
 SSL=( 1 )
 THREADS=( 1 )
+FUNCTION=( 0 )
 manipulate=""
 
 INPUTS=( 4096 )
@@ -131,7 +133,7 @@ setParameters() {
     LONG=experiment:,etype:,protocols:,compflags:,progflags:,runflags:
     LONG+=,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:
     LONG+=,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:
-    LONG+=,split:,packbool:,optshare:,ssl:,threads:,manipulate:
+    LONG+=,split:,packbool:,optshare:,ssl:,threads:,manipulate:,function:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -190,6 +192,9 @@ setParameters() {
                 shift;; 
             --threads)
                 setArray THREADS "$2"
+                shift;;
+            --function)
+                setArray FUNCTION "$2"
                 shift;;
             --manipulate)
                 manipulate="$2"
@@ -251,7 +256,7 @@ setParameters() {
     rm -f "$loopvarpath"
     # Config Vars
     configvars=( OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE )
-    configvars+=( SSL THREADS )
+    configvars+=( SSL THREADS FUNCTION )
     for type in "${configvars[@]}"; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"
@@ -280,6 +285,7 @@ setParameters() {
         echo "    Experiment = $EXPERIMENT $ETYPE"
         echo "    Nodes = ${NODES[*]}"
         echo "    Internal network = 10.10.$NETWORK.0/24"
+        echo "    Function: ${FUNCTION[*]}"
         echo "    Protocols: ${PROTOCOL[*]}"
         echo "    Datatypes = ${DATATYPE[*]}"
         echo "    Inputs = ${INPUTS[*]}"

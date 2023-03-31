@@ -74,7 +74,7 @@ and F9. This activates the trap that launches the verification and exporting of 
 
 #### On-off switch
 
-An on-off switch is a variable that activates or deactivates something, represented as value 0 for "off" and k > 0 for "on".
+An on-off switch is a variable that activates or deactivates something, represented as value 0 for "off" and  >0 for "on", allowing different values.
 A switch differs from a variable that it assumes less values and in the way it is handled later, for example in the plotting step, having switch positions included in the filename.
 To implement a new switch, code has to be added in various places. The following guides through the steps to add the switch "ssl", that activates or deactives SSL-encryption.
 
