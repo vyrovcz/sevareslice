@@ -44,6 +44,8 @@ help() {
     echo "     --function       Function Identifier (0: Search, 2: AND, ...)"
     # variables
     echo "     --threads        Number of parallel processes to use"
+    echo "     --txbuffer       Number of gates to buffer until sending them to the receiving party"
+    echo "     --rxbuffer       Number of messages to buffer until processing"
     echo "     --config         config files run with <path> as parameter, nodes can be given separatly"
     echo "                      allowed form: $0 --config file.conf [nodeA,...]"
     echo -e "\nManipulate Host Environment (optional)"
@@ -100,6 +102,8 @@ OPTSHARE=( 1 )
 SSL=( 1 )
 THREADS=( 1 )
 FUNCTION=( 0 )
+TXBUFFER=( 0 )
+RXBUFFER=( 0 )
 manipulate=""
 
 INPUTS=( 4096 )
@@ -134,6 +138,7 @@ setParameters() {
     LONG+=,nodes:,input:,measureram,cpu:,cpuquota:,freq:,ram:,swap:
     LONG+=,config:,latency:,bandwidth:,packetdrop:,help,dtype:,preproc:
     LONG+=,split:,packbool:,optshare:,ssl:,threads:,manipulate:,function:
+    LONG+=,txbuffer:,rxbuffer:
 
     PARSED=$(getopt --options ${SHORT} \
                     --longoptions ${LONG} \
@@ -196,6 +201,12 @@ setParameters() {
             --function)
                 setArray FUNCTION "$2"
                 shift;;
+            --txbuffer)
+                setArray TXBUFFER "$2"
+                shift;;
+            --rxbuffer)
+                setArray RXBUFFER "$2"
+                shift;;
             --manipulate)
                 manipulate="$2"
                 shift;;
@@ -238,6 +249,7 @@ setParameters() {
             -x)
                 CONFIGRUN=true;;
             *) error $LINENO "${FUNCNAME[0]}(): unrecognized flag $1 $2";;
+            # "
         esac
         shift || true      # skip to next option-argument pair
     done
@@ -256,7 +268,7 @@ setParameters() {
     rm -f "$loopvarpath"
     # Config Vars
     configvars=( OPTSHARE PACKBOOL SPLITROLES PROTOCOL PREPROCESS DATATYPE )
-    configvars+=( SSL THREADS FUNCTION )
+    configvars+=( SSL THREADS FUNCTION TXBUFFER RXBUFFER )
     for type in "${configvars[@]}"; do
         declare -n ttypes="${type}"
         parameters="${ttypes[*]}"

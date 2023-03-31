@@ -61,7 +61,7 @@ def indentor(file, indentation_level, text):
     file.write(textwrap.indent(text, prefix=" " * 4 * indentation_level) + os.linesep)
 
 def getConsString(constellation):
-    return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"] + "ssl" + constellation["ssl"]
+    return "pre" + constellation["pre"] + "split" + constellation["split"] + "pack" + constellation["pack"] + "opt" + constellation["opt"] + "ssl" + constellation["ssl"] + "fun" + constellation["fun"]
 
 def fileExists(path, substring):
     for file in os.listdir(path):
@@ -120,7 +120,7 @@ def genTex(tex_name, exp_prefix, plots, name, constellation, datatypemode=0):
         indentor(file, 1, r"\item Metric: " + get_name(exp_prefix).split("[")[0] + " - runtime")
         switchpositions = "Preprocessing: " + constellation["pre"] + ", Split Roles: " + constellation["split"]
         switchpositions += ", Pack Bool: " + constellation["pack"] + ", Optimize Sharing: " + constellation["opt"]
-        switchpositions +=  ", SSL: " + constellation["ssl"]
+        switchpositions +=  ", SSL: " + constellation["ssl"] + ", Function: " + constellation["fun"]
         indentor(file, 1, r"\item Switches: " + switchpositions)
         indentor(file, 1, r"\item Specs: " + get_Specs(tex_name))
         indentor(file, 1, r"\end{itemize}")
@@ -202,11 +202,11 @@ with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
             maxdtype = max(numbers)   
 
 print()
+print("Recognized protocols: ", protocols)
 print("Recognized datatypes: ", datatypes)
 print("Recognized prefixes: ", prefixes)
 #print(constellations)
-#print(getConsString(constellations[0]))
-print("Recognized protocols: ", protocols)
+print("First switch constellation: ", getConsString(constellations[0]))
 #print(plots)
 print()
 
@@ -288,7 +288,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
 
     # title page information
     capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
-        "SplitRoles", "Pack", "Optimized", "SSL", "THREADS", "CPUS", "QUOTAS", "FREQS", "RAM",
+        "SplitRoles", "Pack", "Optimized", "SSL", "Function", "  Threads", "CPUS", "QUOTAS", "FREQS", "RAM",
         "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
     with open(glob.glob(sevaredir + "E*-run-summary.dat")[0], "r") as f:
         for line in f:
@@ -372,7 +372,7 @@ else:
 
     positions = {}
     # add switch positions to the filename
-    for switch in ["pre", "split", "pack", "opt", "ssl"]:
+    for switch in ["pre", "split", "pack", "opt", "ssl", "fun"]:
         for constellation in constellations:
             if switch in positions:
                 if constellation[switch] not in positions[switch]:

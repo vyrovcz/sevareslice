@@ -85,8 +85,8 @@ datafile_array = [None] * len(variable_array)
 
 # Adaption
 # switches are on/off values, where a feature is either off or on
-# e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing; h -> ssl
-switches_names = ["preprocess", "splitroles", "packbool", "optshare", "ssl"]
+# e -> preprocess; r -> splitroles; c -> packbool; o -> optimize sharing; h -> ssl; f -> function;
+switches_names = ["preprocess", "splitroles", "packbool", "optshare", "ssl", "function"]
 switch_indexes = [-1] * len(switches_names)
 
 # Get indexes of present columns
@@ -202,15 +202,16 @@ for i in range(len(index_array)):
         pack = line[switch_indexes[2]] if switch_indexes[2] > 0 else 0
         opt = line[switch_indexes[3]] if switch_indexes[3] > 0 else 1
         ssl = line[switch_indexes[4]] if switch_indexes[4] > 0 else 1
+        function = line[switch_indexes[5]] if switch_indexes[5] > 0 else 0
         # we want all dtypes for variable input, so special case if handling input size
         if i == len(index_array) - 1:
             dtype = line[index_array[0]]
             var_val_array[0] = None
         else:
             dtype = str(var_val_array[0]) if var_val_array[0] != None else "all"
-        # path of form parsed/2D/p1/d128Bwd_pre0split0pack0opt1ssl1.txt
+        # path of form parsed/2D/p1/d128Bwd_pre0split0pack0opt1ssl1fun0.txt
         txtpathbase = data_dir + "parsed/2D/" + protocol + "/" + "d" + dtype + "_" + str(var_name_array[i])
-        txtpath = txtpathbase + "pre" + str(pre) + "split" + str(split) + "pack" + str(pack) + "opt" + str(opt) + "ssl" + str(ssl) + ".txt"
+        txtpath = txtpathbase + "pre" + str(pre) + "split" + str(split) + "pack" + str(pack) + "opt" + str(opt) + "ssl" + str(ssl) + "fun" + str(function) + ".txt"
         if txtpath != previous :
             # Create 2D file descriptor
             datafile2D = open(txtpath, "a", 1)
