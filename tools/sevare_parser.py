@@ -75,9 +75,9 @@ comm_rounds_index = -1
 data_sent_index = -1
 
 # datatype and inputsize must stay at position [0] and [-1] to work, add new vars inbetween
-variable_array = ["datatype", "threads"] # Adaptions
+variable_array = ["datatype", "threads", "txbuffer", "rxbuffer"] # Adaptions
 variable_array += ["latencies(ms)", "bandwidths(Mbs)", "packetdrops(%)", "freqs(GHz)", "quotas(%)", "cpus", "input_size"]  # Names from the table!
-var_name_array = ["Dtp_", "Thd_"] # Adaptions
+var_name_array = ["Dtp_", "Thd_", "txB_", "rxB_"] # Adaptions
 var_name_array += ["Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_", "Inp_"]  # INDICES HAVE TO MATCH ABOVE ARRAY
 var_val_array = [None] * len(variable_array)  # used to store changing variables
 index_array = [-1] * len(variable_array)

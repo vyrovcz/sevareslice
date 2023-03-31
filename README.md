@@ -407,7 +407,7 @@ manipulations = ""
 for i,prefix in enumerate(["Thd_", "Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
 ```
 
-- add the variable to the title page information by adding ("**, "THREADS"**") to the capture array:
+- add the variable to the title page information by adding ("**, "Threads"**") to the capture array:
 
 ```
     # title page information
