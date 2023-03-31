@@ -307,6 +307,8 @@ setParameters() {
         echo "    Optimized Sharing: ${OPTSHARE[*]}"
         echo "    SSL: ${SSL[*]}"
         echo "    Threads: ${THREADS[*]}"
+        echo "    txBuffer: ${TXBUFFER[*]}"
+        echo "    rxBuffer: ${RXBUFFER[*]}"
         echo "    Testtypes:"
         for type in "${TTYPES[@]}"; do
             declare -n ttypes="${type}"
