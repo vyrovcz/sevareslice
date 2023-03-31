@@ -317,7 +317,7 @@ THREADS=( 1 )
     ...
     echo "    Optimized Sharing: ${OPTSHARE[*]}"
     echo "    SSL: ${SSL[*]}"
-    echo "    THREADS: ${THREADS[*]}"
+    echo "    Threads: ${THREADS[*]}"
 ```
 
 In `host_scripts\measurement.sh`:

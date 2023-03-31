@@ -288,7 +288,7 @@ setParameters() {
         echo "    Pack Bool: ${PACKBOOL[*]}"
         echo "    Optimized Sharing: ${OPTSHARE[*]}"
         echo "    SSL: ${SSL[*]}"
-        echo "    THREADS: ${THREADS[*]}"
+        echo "    Threads: ${THREADS[*]}"
         echo "    Testtypes:"
         for type in "${TTYPES[@]}"; do
             declare -n ttypes="${type}"
