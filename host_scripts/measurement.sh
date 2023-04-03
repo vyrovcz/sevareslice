@@ -139,13 +139,16 @@ elif [ "$splitroles" -eq 3 ]; then
 fi
 
 # divide external runtime x*j
+# Todo: divide normal binary run by j*j
 
-# do calculations if splitroles is active
-if [ "$splitroles" -gt 0 ]; then
+# do calculations if splitroles is active or more threads are used
+if [ "$splitroles" -gt 0 ] || [ "$threads" -gt 1 ]; then
 
-    # 3nodes:   calculate mean of 6*j*6*j  results ( /6*j /6*j )
-    # 3-4nodes: calculate mean of 18*j*18*j results ( /18*j /18*j )
-    # 4nodes:   calculate mean of 24*j*24*j results ( /24*j /24*j )
+    # binary:   calculate mean of j results running concurrent ( /j *j )
+    # 3nodes:   calculate mean of 6*j results running concurrent ( /6*j *6*j )
+    # 3-4nodes: calculate mean of 18*j results running concurrent ( /18*j *18*j )
+    # 4nodes:   calculate mean of 24*j results running concurrent ( /24*j *24*j )
+    [ "$splitroles" -eq 0 ] && divisor=$((threads*threads)) && divisorExt=$((threads))
     [ "$splitroles" -eq 1 ] && divisor=$((6*6*threads*threads)) && divisorExt=$((6*threads))
     [ "$splitroles" -eq 2 ] && divisor=$((18*18*threads*threads)) && divisorExt=$((18*threads))
     [ "$splitroles" -eq 3 ] && divisor=$((24*24*threads*threads)) && divisorExt=$((24*threads))

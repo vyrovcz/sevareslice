@@ -227,7 +227,7 @@ os.mkdir(sevaredir + "plotted/include/02input")
 for constellation in constellations:
     for protocol in protocols:
         plots = [protocol + "/" + datatype for datatype in datatypes]
-        savepath = "plotted/include/02input/01s" + protocol + "_" + getConsString(constellation) + ".tex"
+        savepath = "plotted/include/02input/0s" + protocol + "_" + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, "Inp_", plots, " Protocol -s " + protocol, constellation, 1)
         print(" generated " + savepath)
 
