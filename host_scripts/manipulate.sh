@@ -41,20 +41,33 @@ setQuota() {
 
 limitBandwidth() {
 
-    echo "${FUNCNAME[0]} - manipulate=$manipulate"
+    #echo "${FUNCNAME[0]} - manipulate=$manipulate"
+    bandwidth=$(pos_get_variable bandwidths --from-loop)
+    NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
+    NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
 
-    if [ "$manipulate" == "1111" ]; then
-        bandwidth=$(pos_get_variable bandwidths --from-loop)
-        NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
-        NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
-        NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
+    # Manipulate every link between each node
+    if [ "$manipulate" == "1" ]; then
         tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
         # check network topology - for directly connected hosts:
         [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
         [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
         return 0
     else
-        true
+    # Manipulate custom links
+        nodenumber=$player
+        # if 4 nodes and this node is active (player equals to nodenumber)
+        if [ ${#manipulate} -eq 4 ] && [ "${manipulate:nodenumber:1}" -eq 1 ]; then
+            # NIC0 is always connected to next node in the circularly sort defintion
+            # and equals to the next digit in the manipulate string/number
+            # (player+1)mod4 -> NIC0; (player+2)mod4 -> NIC1; (player+3) -> NIC2
+            # test if next nodes are active for manipulation
+            for nic in $NIC0 $NIC1 $NIC2; do
+                [ "${manipulate:(((++nodenumber) % 4)):1}" -eq 1 ] &&
+                    tc qdisc add dev "$nic" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+            done
+        fi
     fi
 }
 
@@ -173,8 +186,10 @@ resetTrafficControl() {
 
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
     tc qdisc delete dev "$NIC0" root
     [ "$NIC1" != 0 ] && tc qdisc delete dev "$NIC1" root
+    [ "$NIC2" != 0 ] && tc qdisc delete dev "$NIC2" root
     return 0
 }
 

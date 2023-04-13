@@ -60,6 +60,14 @@ help() {
     echo " -l, --latency        latency of network in ms, with <Values>"
     echo " -b, --bandwidth      bandwidth of network in MBit/s, with <Values>"
     echo " -d, --packetdrop     packet drop/loss in network in %, with <Values>"
+    echo "     --manipulate     specify custom links to manipulate, instead of all links (=\"1111\"),"
+    echo "                      by defining a digit 0 or 1 for each node, where the link between two nodes is"
+    echo "                      manipulated if both are 1. Examples for 4 nodes:"
+    echo "                      1111 (default, all links are manipulated)"
+    echo "                      0000 (useless, no links are manipulated, equivalent to no manipulation options)"
+    echo "                      1100 (Only the link between node1 and node2 is manipulated)"
+    echo "                      0111 (Links between node2, node3 and node4 are manipulated)"
+    echo "                      Notice: nodes constellation must be circularly sorted (should be anyway)"
 	echo -e "\nAvailable NODES:\n"
 	# xargs replaces '\n' with ' '
 	pos no li | grep -E "$(whoami)|None" | awk '{print $1}' | xargs
@@ -104,7 +112,7 @@ THREADS=( 1 )
 FUNCTION=( 0 )
 TXBUFFER=( 0 )
 RXBUFFER=( 0 )
-manipulate="1111"
+manipulate="1"
 
 INPUTS=( 4096 )
 CPUS=()

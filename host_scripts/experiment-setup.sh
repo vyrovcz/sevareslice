@@ -121,8 +121,8 @@ if [ "$nic1" != 0 ] && [ "$nic2" != 0 ]; then
 elif [ "$nic1" != 0 ]; then
 
 	# to achieve high speeds, install ddp drivers
-	[ "$(hostname | grep -cE "meld|tinyman|yieldly|gard|goracle|zone")" -eq 1 ] && \
-		installDriver
+	highspeed=$(hostname | grep -cE "idex|meld|tinyman|yieldly|algofi|gard|goracle|zone")
+	[ "$highspeed" -eq 1 ] && installDriver
 
 	# verify that nodes array is circularly sorted
 	# this is required for the definition of this topology
