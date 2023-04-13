@@ -104,7 +104,7 @@ THREADS=( 1 )
 FUNCTION=( 0 )
 TXBUFFER=( 0 )
 RXBUFFER=( 0 )
-manipulate=""
+manipulate="1111"
 
 INPUTS=( 4096 )
 CPUS=()
@@ -380,6 +380,9 @@ parseConfig() {
             # run a new instance of sevarebench with the parsed parameters
             # internal flag -x prevents the recursive closing of the process
             # group in the trap logic that would also close this instance
+            # the "|| error" part stops the config run!
+            # to continue with the next config file, use "|| true"
+            # to introduce functionality for repeating a failed run, this might be the place
             bash "$0" -x "${flagsnparas[@]}" || 
                 error ${LINENO} "${FUNCNAME[0]}(): stopping config run due to an error"
                 

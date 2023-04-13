@@ -41,13 +41,21 @@ setQuota() {
 
 limitBandwidth() {
 
-    bandwidth=$(pos_get_variable bandwidths --from-loop)
-    NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
-    NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
-    tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-    # check network topology - for directly connected hosts:
-    [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-    return 0
+    echo "${FUNCNAME[0]} - manipulate=$manipulate"
+
+    if [ "$manipulate" == "1111" ]; then
+        bandwidth=$(pos_get_variable bandwidths --from-loop)
+        NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
+        NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+        NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
+        tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+        # check network topology - for directly connected hosts:
+        [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+        [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+        return 0
+    else
+        true
+    fi
 }
 
 setLatency() {
@@ -55,8 +63,10 @@ setLatency() {
     latency=$(pos_get_variable latencies --from-loop)
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
     tc qdisc add dev "$NIC0" root netem delay "$latency"ms
     [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root netem delay "$latency"ms
+    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root netem delay "$latency"ms
     return 0
 }
 
@@ -67,8 +77,10 @@ setPacketdrop() {
     # for 3 interconnected hosts topologies
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
     tc qdisc add dev "$NIC0" root netem loss "$packetdrop"%
     [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root netem loss "$packetdrop"%
+    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root netem loss "$packetdrop"%
     return 0
 }
 
@@ -88,11 +100,13 @@ setLatencyBandwidth() {
 
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
 
     tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit latency "$latency"ms burst 50kb
     # check if switch topology (bc in this case only 1 interface pro host)
-    # for 3 interconnected hosts topologies
+    # for interconnected hosts topologies
     [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit latency "$latency"ms burst 50kb
+    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root tbf rate "$bandwidth"mbit latency "$latency"ms burst 50kb
     return 0
 }
 
@@ -102,13 +116,16 @@ setBandwidthPacketdrop() {
 
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
 
     tc qdisc add dev "$NIC0" root handle 1:0 netem loss "$packetdrop"%
     tc qdisc add dev "$NIC0" parent 1:1 handle 10: tbf rate "$bandwidth"mbit burst 50kb limit 50kb
     # check if switch topology (bc in this case only 1 interface pro host)
-    # for 3 interconnected hosts topologies
+    # for interconnected hosts topologies
     [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root handle 1:0 netem loss "$packetdrop"%
     [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" parent 1:1 handle 10: tbf rate "$bandwidth"mbit burst 50kb limit 50kb
+    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root handle 1:0 netem loss "$packetdrop"%
+    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" parent 1:1 handle 10: tbf rate "$bandwidth"mbit burst 50kb limit 50kb
     return 0
 }
 
@@ -118,11 +135,13 @@ setPacketdropLatency() {
 
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
 
     tc qdisc add dev "$NIC0" root netem delay "$latency"ms loss "$packetdrop"%
     # check if switch topology (bc in this case only 1 interface pro host)
-    # for 3 interconnected hosts topologies
+    # for interconnected hosts topologies
     [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root netem delay "$latency"ms loss "$packetdrop"%
+    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root netem delay "$latency"ms loss "$packetdrop"%
     return 0
 }
 
