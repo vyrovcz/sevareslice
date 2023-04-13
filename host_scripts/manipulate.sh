@@ -53,7 +53,6 @@ limitBandwidth() {
         # check network topology - for directly connected hosts:
         [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
         [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-        return 0
     else
     # Manipulate custom links
         nodenumber=$player
@@ -69,6 +68,7 @@ limitBandwidth() {
             done
         fi
     fi
+    return 0
 }
 
 setLatency() {
