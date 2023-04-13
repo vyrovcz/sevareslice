@@ -248,6 +248,14 @@ manipulations = ""
 for i,prefix in enumerate(["Thd_", "txB_", "rxB_", "Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
     if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
         continue
+
+    # skip single value plot files
+    skip = False
+    with open(glob.glob(sevaredir + "parsed/2D/" + protocols[0] + "/*" + prefix + "*")[0], "r") as f:
+        skip = True if len(f.readlines()) < 2 else False
+    if skip:
+        continue
+
     manipulations += prefix
     for constellation in constellations:
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
@@ -288,7 +296,7 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 2, r"\fontsize{5pt}{7pt}\selectfont")
 
     # title page information
-    capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing",
+    capture = ["Protocols", "Datatypes", "Inputs", "Preprocessing", "manipulate",
         "SplitRoles", "Pack", "Optimized", "SSL", "Function", "  Threads", 
         "txBuffer", "rxBuffer", "CPUS", "QUOTAS", "FREQS", "RAM",
         "LATENCIES", "BANDWIDTHS", "PACKETDROPS", "Summary file", "runtime"]
