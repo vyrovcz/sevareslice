@@ -187,9 +187,20 @@ resetTrafficControl() {
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
     NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
-    tc qdisc delete dev "$NIC0" root
-    [ "$NIC1" != 0 ] && tc qdisc delete dev "$NIC1" root
-    [ "$NIC2" != 0 ] && tc qdisc delete dev "$NIC2" root
+
+    if [ "$manipulate" == "1" ]; then
+        tc qdisc delete dev "$NIC0" root
+        [ "$NIC1" != 0 ] && tc qdisc delete dev "$NIC1" root
+        [ "$NIC2" != 0 ] && tc qdisc delete dev "$NIC2" root
+    else
+        nodenumber=$player
+        if [ ${#manipulate} -eq 4 ] && [ "${manipulate:nodenumber:1}" -eq 1 ]; then
+            for nic in $NIC0 $NIC1 $NIC2; do
+                [ "${manipulate:(((++nodenumber) % 4)):1}" -eq 1 ] &&
+                    tc qdisc delete dev "$nic" root
+            done
+        fi
+    fi
     return 0
 }
 

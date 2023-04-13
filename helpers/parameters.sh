@@ -17,8 +17,8 @@ usage() {
 }
 
 help() {
-	echo "$0 - run SMC experiments with MP-Slice protocol in a POS testbed environment"
-    echo "Example:  ./$0 -e 31_scalable_search -p shamir,atlas -n valga,tapa,rapla -i 10,20,...,100 -q 20,40,80 -f 1.9,2.6"
+	echo "$0 - run SMC experiments with MP-Slice in a POS testbed environment"
+    echo "Example:  ./$0 -p 1,2,...,6 -n algofi,gard,goracle,zone --dtype 64 -b 20000 -i 10,20,...,100 -q 20,40,80 -f 1.9,2.6"
     echo
     echo "<Values> supported are of the form <value1>[,<value2>,...] or use \"...\" to specify the range"
     echo "       [...,<valuei>,]<start>,<next>,...,<stop>[,valuek,...], with increment steps <next>-<start>"
@@ -67,6 +67,7 @@ help() {
     echo "                      0000 (useless, no links are manipulated, equivalent to no manipulation options)"
     echo "                      1100 (Only the link between node1 and node2 is manipulated)"
     echo "                      0111 (Links between node2, node3 and node4 are manipulated)"
+    echo "                      0100 (only one \"1\" is also useless, because a link always needs two nodes)"
     echo "                      Notice: nodes constellation must be circularly sorted (should be anyway)"
 	echo -e "\nAvailable NODES:\n"
 	# xargs replaces '\n' with ' '
