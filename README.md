@@ -427,7 +427,7 @@ If, for some reason, the interface names are not documented, the following proce
 
 - The NICs are arranged circularly sorted, so that NIC0 is connected to the node alphabetically in sequence. (algofi: NIC0 -> gard, NIC1 -> goracle, NIC2 -> zone; or gard: NICO -> goracle, NIC1 -> zone, NIC2 -> algofi; or goracle: NIC0 -> zone, NIC1 -> algofi, NIC2 -> gard)
 
-<img src="https://github.com/vyrovcz/sevareslice/raw/main/assets/addhostsinit.png" alt="Init Graph" width="100">
+<img src="https://github.com/vyrovcz/sevareslice/raw/main/assets/addhostsinit.png" alt="Init Graph" width="600">
 
 - Reserve the nodes and reset them, using all four nodes in alphabetical order. This will fail since interfaces are missing.
 
@@ -575,7 +575,7 @@ From 10.10.10.2 icmp_seq=1 Destination Host Unreachable
 - Now repeat this step on the other nodes by adjusting the corresponding ip addresses in the ping-for-loop
 - add to the NIC0/1/2 labels the corresponding interface names in the graph picture and define the NIC labels in `global-variables.yml`
 
-<img src="https://github.com/vyrovcz/sevareslice/raw/main/assets/addhostsentries.png" alt="Graph with entries" width="100">
+<img src="https://github.com/vyrovcz/sevareslice/raw/main/assets/addhostsentries.png" alt="Graph with entries" width="600">
 
 ```
 ## testbedCoinbase NIC configuration
