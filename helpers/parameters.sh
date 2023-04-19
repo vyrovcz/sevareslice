@@ -8,8 +8,6 @@ usage() {
     echo "           -q(--cpuquota) | -f[req] | -r[am] | -l[atency] | -b(andwidth)} |"
     echo "           -d(--packetdrop)"
     echo -e "\nRun '$0 --help' for more information.\n"
-    echo "Available experiments:"
-	ls experiments
     echo -e "\nAvailable NODES:"
 	# xargs replaces '\n' with ' '
 	pos no li | grep -E "$(whoami)|None" | awk '{print $1}' | xargs
@@ -90,7 +88,8 @@ help() {
     echo "                          node4 -> all -> node1 && node2 && node3"
     echo "                          node1 -> none"
     echo "                      7777 (useless, no links are manipulated, equivalent to no manipulation options)"
-    echo "                      To limit the only the link between node3 and node4 in both directions to"
+    echo "                      6666 (default, all links are manipulated)"
+    echo "                      To limit only the link between node3 and node4 in both directions to"
     echo "                      simulate a low bandwidth bottleneck: 7027"
     echo "                      7027 activats Tx manipulations on"
     echo "                          node2 -> none"
@@ -141,7 +140,7 @@ THREADS=( 1 )
 FUNCTION=( 0 )
 TXBUFFER=( 0 )
 RXBUFFER=( 0 )
-manipulate="1"
+manipulate="6666"
 
 INPUTS=( 4096 )
 CPUS=()
