@@ -39,7 +39,7 @@ setQuota() {
     return 0
 }
 
-limitBandwidth() {
+limitBandwidthold() {
 
     #echo "${FUNCNAME[0]} - manipulate=$manipulate"
     bandwidth=$(pos_get_variable bandwidths --from-loop)
@@ -68,6 +68,50 @@ limitBandwidth() {
             done
         fi
     fi
+    return 0
+}
+
+limitBandwidth() {
+
+    nodenumber=$player
+    nodemanipulate="${manipulate:nodenumber:1}"
+
+    # skip when code 7 -> do not manipulate any link
+    [ "$nodemanipulate" -eq 7 ] && return 0
+
+    #echo "${FUNCNAME[0]} - manipulate=$manipulate"
+    bandwidth=$(pos_get_variable bandwidths --from-loop)
+    NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
+    NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
+    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
+
+    # three interconnected nodes
+    if [ "$partysize" -eq 3 ]; then
+        # the code to active NIC0 is 0 and 2, exclude 1 to match
+        [ "$nodemanipulate" -ne 1 ] &&
+            tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+        # the code to active NIC1 is 1 and 2, exclude 0 to match
+        [ "$NIC1" != 0 ] && [ "$nodemanipulate" -ne 0 ] &&
+            tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+
+    # four interconnected nodes
+    elif [ "$partysize" -eq 4 ]; then
+        NIC0codes=( 0 3 4 6 )
+        NIC1codes=( 1 3 5 6 )
+        NIC2codes=( 2 4 5 6 )
+
+        [[ ${NIC0codes[*]} =~ $nodemanipulate ]] &&
+            tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+        [ "$NIC1" != 0 ] && [[ ${NIC1codes[*]} =~ ${nodemanipulate} ]] &&
+            tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+        [ "$NIC2" != 0 ] && [[ ${NIC2codes[*]} =~ ${nodemanipulate} ]] &&
+            tc qdisc add dev "$NIC2" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+
+    # one NIC topology
+    else
+        tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+    fi
+
     return 0
 }
 
