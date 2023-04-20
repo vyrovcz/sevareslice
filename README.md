@@ -609,10 +609,6 @@ node2NIC0: *NICtestbedA
 node3NIC0: *NICtestbedA
 ```
 
-#### Direct connection topology
-
-Design and define node connection model. Recommended and intuitive is the circularly sorted approach like in the following example. Already implemented directly connected nodes are also defined in a circularly sorted fashion.
-
 
 ## Known limitations
 

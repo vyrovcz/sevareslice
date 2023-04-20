@@ -345,7 +345,7 @@ setParameters() {
         echo "    Threads: ${THREADS[*]}"
         echo "    txBuffer: ${TXBUFFER[*]}"
         echo "    rxBuffer: ${RXBUFFER[*]}"
-        [ "$manipulate" != "1" ] && echo "    manipulate: $manipulate"
+        [ "$manipulate" != "6666" ] && echo "    manipulate: $manipulate"
         echo "    Testtypes:"
         for type in "${TTYPES[@]}"; do
             declare -n ttypes="${type}"
