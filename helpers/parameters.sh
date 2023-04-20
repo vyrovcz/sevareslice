@@ -414,14 +414,25 @@ parseConfig() {
             done
             echo "running \"bash $0 ${flagsnparas[*]}\""
 
-            # run a new instance of sevarebench with the parsed parameters
-            # internal flag -x prevents the recursive closing of the process
-            # group in the trap logic that would also close this instance
-            # the "|| error" part stops the config run!
-            # to continue with the next config file, use "|| true"
-            # to introduce functionality for repeating a failed run, this might be the place
-            bash "$0" -x "${flagsnparas[@]}" || 
-                error ${LINENO} "${FUNCNAME[0]}(): stopping config run due to an error"
+            retry=1
+            while [ "$retry" -eq 1 ]; do
+                retry=0
+
+                # run a new instance of sevarebench with the parsed parameters
+                # internal flag -x prevents the recursive closing of the process
+                # group in the trap logic that would also close this instance
+                bash "$0" -x "${flagsnparas[@]}"
+
+                # catch retry error codes, set them with the error function in the
+                # getlastoutput() function in the trap_helper.sh
+                exitcode=$?
+                if [ "$exitcode" -eq 4 ]; then
+                    warning "Random error assumed so trying again"
+                    retry=1
+                elif [ "$exitcode" -ne 0 ]; then
+                    error ${LINENO} "${FUNCNAME[0]}(): stopping config run due to an error"
+                fi
+            done
                 
         done <<< "${config[experiments]}",
 

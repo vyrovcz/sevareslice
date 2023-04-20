@@ -42,7 +42,7 @@ cleanup() {
 
   # only close if not in configrun mode
   if ! "$CONFIGRUN"; then
-    # this looks up the process group of this scripts and
+    # this looks up the process group of this script and
     # gracefully closes them. Otherwise running this script
     # can leave zombie processes   
     pgid=$(ps -o pgid= $$)
@@ -55,7 +55,7 @@ trap cleanup 0
 
 configruntrap() {
   echo "done with config file run"
-  # this looks up the process group of this scripts and
+  # this looks up the process group of this script and
   # gracefully closes them. Otherwise running this script
   # can leave zombie processes   
   pgid=$(ps -o pgid= $$)
@@ -82,22 +82,30 @@ error() {
 getlastoutput() {
   # this can help identifying the problem on the host by printing the last output
   filename=$(find "$RPATH/${NODES[0]}/" -name "*testresults*" -print | tail -n 1)
-  if [ -f "$filename" ]; then
-    echo "  filename: $filename"
-    echo -e "\n  Last protocol run printed:\n"
-    cat "$filename"
-    echo
-    # get last three loop variables constellations
-    echo -e "  Last three loop variables constellations:\n"
-    for file in $(find "$RPATH/${NODES[0]}/" -name "*loop*" -print | tail -n 3); do 
-      cat "$file"
-      echo 
-    done
-    echo
-  else
+
+  if [ ! -f "$filename" ]; then
     echo "  no protocol run detected"
+    error ${LINENO} "an error occured on one of the nodes"
   fi
-  error ${LINENO} "an error occured on one of the nodes"
+
+  echo "  filename: $filename"
+  echo -e "\n  Last protocol run printed:\n"
+  cat "$filename"
+  echo
+  # get last three loop variables constellations
+  echo -e "  Last three loop variables constellations:\n"
+  for file in $(find "$RPATH/${NODES[0]}/" -name "*loop*" -print | tail -n 3); do 
+    cat "$file"
+    echo 
+  done
+  echo
+
+  errorcode=1
+  # Should the run be repeated, hand over a retry error code
+  timeout="$(grep -c "exited with non-zero status 124" "$filename")"
+  # timeout and moor then 9 loop iterations
+  [ "$timeout" -eq 1 ] && [ "${filename: -2}" -gt 9 ] && errorcode=4
+  error ${LINENO} "an error occured on one of the nodes" "$errorcode"
 }
 
 trap 'error ${LINENO}' ERR
