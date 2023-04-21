@@ -100,7 +100,7 @@ getlastoutput() {
   done
   echo
 
-  errorcode=1
+  errorcode="${1:-1}"
   # Should the run be repeated, hand over a retry error code
   timeout="$(grep -c "exited with non-zero status 124" "$filename")"
   # timeout and moor then 9 loop iterations

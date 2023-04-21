@@ -412,7 +412,6 @@ parseConfig() {
                 # skip experiment flag
                 [ "$flag" != experiments ] && flagsnparas=( "${flagsnparas[@]}" --"$flag" "${config[$flag]}" )
             done
-            echo "running \"bash $0 ${flagsnparas[*]}\""
 
             retry=1
             while [ "$retry" -eq 1 ]; do
@@ -427,7 +426,9 @@ parseConfig() {
                 # getlastoutput() function in the trap_helper.sh
                 exitcode=$?
                 if [ "$exitcode" -eq 4 ]; then
-                    warning "Random error assumed so trying again"
+                    warning "Random error assumed, so trying again"
+                    echo
+                    echo "running \"bash $0 ${flagsnparas[*]}\""
                     retry=1
                 elif [ "$exitcode" -ne 0 ]; then
                     error ${LINENO} "${FUNCNAME[0]}(): stopping config run due to an error"
