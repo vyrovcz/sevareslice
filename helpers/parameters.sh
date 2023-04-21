@@ -420,15 +420,16 @@ parseConfig() {
                 # run a new instance of sevarebench with the parsed parameters
                 # internal flag -x prevents the recursive closing of the process
                 # group in the trap logic that would also close this instance
+                echo "running \"bash $0 ${flagsnparas[*]}\""
                 bash "$0" -x "${flagsnparas[@]}"
 
                 # catch retry error codes, set them with the error function in the
                 # getlastoutput() function in the trap_helper.sh
                 exitcode=$?
                 if [ "$exitcode" -eq 4 ]; then
-                    warning "Random error assumed, so trying again"
+                    warning "Random error assumed, so trying again. Waiting 5s for nodes to detach..."
+                    sleep 5
                     echo
-                    echo "running \"bash $0 ${flagsnparas[*]}\""
                     retry=1
                 elif [ "$exitcode" -ne 0 ]; then
                     error ${LINENO} "${FUNCNAME[0]}(): stopping config run due to an error"

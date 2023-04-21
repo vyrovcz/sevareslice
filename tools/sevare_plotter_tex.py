@@ -244,7 +244,7 @@ os.mkdir(sevaredir + "plotted/include/01manipulations")
 ## fixed input views, using the highest input value
 ######
 # other manipulations
-manipulations = ""
+testtypes = ""
 for i,prefix in enumerate(["Thd_", "txB_", "rxB_", "Lat_", "Bwd_", "Pdr_", "Frq_", "Quo_", "Cpu_"],2):
     if not fileExists(sevaredir + "parsed/2D/" + protocols[0], prefix):
         continue
@@ -256,14 +256,14 @@ for i,prefix in enumerate(["Thd_", "txB_", "rxB_", "Lat_", "Bwd_", "Pdr_", "Frq_
     if skip:
         continue
 
-    manipulations += prefix
+    testtypes += prefix
     for constellation in constellations:
         plots = [protocol + "/d" + str(maxdtype) for protocol in protocols]
         savepath = "plotted/include/01manipulations/0" + str(i) + "d" + str(maxdtype) + "_" + prefix + getConsString(constellation) + ".tex"
         genTex(sevaredir + savepath, prefix, plots, "Fixed Input: " + str(maxinput) + " -d " + datatype, constellation)
         print(" generated " + savepath)
 
-manipulations = manipulations or "Inp_"
+testtypes = testtypes or "Inp_"
 
 # datatypes
 for constellation in constellations:
@@ -394,7 +394,7 @@ else:
         positions.update({switch: ''.join(sorted(position))})
 
     switches = "_" + getConsString(positions)
-    pdfname = dateid + "_" + manipulations + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
+    pdfname = dateid + "_" + testtypes + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
     print("Latex Built success:")
     print("    " + sevaredir + pdfname)
     # move pdf up
