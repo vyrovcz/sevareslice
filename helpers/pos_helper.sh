@@ -6,14 +6,14 @@ initializePOS() {
 	for node in "${NODES[@]}"; do
 		# -k: keep calender entry
 		{ "$POS" allocations free -k "$node"; } ||
-			error ${LINENO} "${FUNCNAME[0]} allocations free failed for $node"
+			error ${LINENO} "${FUNCNAME[0]} allocations free failed for $node" $?
 	done
 
 	# allocate all NODES at once and store alloc id
 	# sed shifts output lines by four blanks for pretty formating
 	echo "  allocating host(s) ${NODES[*]}"
 	{ ALLOC_ID=$("$POS" allocations allocate "${NODES[@]}" | sed 's/^/    /'); } ||
-		error ${LINENO} "${FUNCNAME[0]} allocations allocate failed"
+		error ${LINENO} "${FUNCNAME[0]} allocations allocate failed" $?
 	echo "$ALLOC_ID"
 	RPATH=$(echo "$ALLOC_ID" | grep Results | awk '{print $3}')
 	ALLOC_ID=$(echo "$ALLOC_ID" | grep Alloc | awk '{print $3}')
@@ -21,7 +21,7 @@ initializePOS() {
 	echo "  setting image of host(s) ${NODES[*]} to $IMAGE"
 	for node in "${NODES[@]}"; do
 		{ "$POS" nodes image "$node" "$IMAGE"; } ||
-			error ${LINENO} "${FUNCNAME[0]} NODES image failed for $node"
+			error ${LINENO} "${FUNCNAME[0]} NODES image failed for $node" $?
 	done
 
 	echo "  loading variables files on host(s) ${NODES[*]}"
@@ -36,14 +36,14 @@ initializePOS() {
 		# loop variables for experiment script (append random num to mitigate conflicts)
 		loopvarpath="variables/loop-variables-$NETWORK.yml"
 		"$POS" alloc set_var "$node" "$loopvarpath" --as-loop;
-		} || error ${LINENO} " ${FUNCNAME[0]} alloc set_var failed for $node"
+		} || error ${LINENO} " ${FUNCNAME[0]} alloc set_var failed for $node" $?
 	done
 
 	echo "  resetting host(s) ${NODES[*]}"
 	for node in "${NODES[@]}"; do
 		# run reset blocking in background and wait for processes to end before continuing
 		{ { "$POS" nodes reset "$node"; } ||
-			error ${LINENO} "${FUNCNAME[0]} NODES reset on $node failed"
+			error ${LINENO} "${FUNCNAME[0]} NODES reset on $node failed" $?
 			echo "    $node booted successfully"; } &
 		PIDS+=( $! )
 	done

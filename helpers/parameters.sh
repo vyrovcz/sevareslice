@@ -424,13 +424,18 @@ parseConfig() {
                 bash "$0" -x "${flagsnparas[@]}"
 
                 # catch retry error codes, set them with the error function in the
-                # getlastoutput() function in the trap_helper.sh
+                # getlastoutput() function in the trap_helper.sh or around the framework
                 exitcode=$?
                 if [ "$exitcode" -eq 4 ]; then
-                    warning "Random error assumed, so trying again. Waiting 5s for nodes to detach..."
+                    warning "Random error assumed, trying again. Waiting 5s for nodes to detach..."
                     sleep 5
                     echo
                     retry=1
+                elif [ "$exitcode" -eq 5 ]; then
+                    warning "POS timeout, trying again. Waiting 5s for nodes to detach..."
+                    sleep 5
+                    echo
+                    retry=1                    
                 elif [ "$exitcode" -ne 0 ]; then
                     error ${LINENO} "${FUNCNAME[0]}(): stopping config run due to an error"
                 fi
