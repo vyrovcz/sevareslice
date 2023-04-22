@@ -275,6 +275,7 @@ for constellation in constellations:
 ### build main tex file
 node = ""
 aborted = ""
+manipulation = ""
 with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
     indentor(file, 0, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     indentor(file, 0, "%% Built with sevareparser on day")
@@ -307,6 +308,8 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             elif "incomplete" in line:
                 aborted = "_aborted"
                 indentor(file, 2, r"Experiment run status: incomplete\\")
+            elif "manipulate" in line and "6666" not in line:
+                manipulation = "_" + line.strip().split(" ")[-1]
             elif "Nodes" in line:
                 node = line.split(" ")[6]
                 indentor(file, 2, line[:-1].replace("=", ":") + " (" + nodehardware[node] + ")" + r"\\")
@@ -393,8 +396,8 @@ else:
     for switch, position in positions.items():
         positions.update({switch: ''.join(sorted(position))})
 
-    switches = "_" + getConsString(positions)
-    pdfname = dateid + "_" + testtypes + cpumodel + minspeed + switches + ( aborted or "" ) + ".pdf"
+    switches = "_" + getConsString(positions) + manipulation
+    pdfname = dateid + "_" + testtypes + cpumodel + minspeed + switches + aborted + ".pdf"
     print("Latex Built success:")
     print("    " + sevaredir + pdfname)
     # move pdf up
