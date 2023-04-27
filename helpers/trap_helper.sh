@@ -103,7 +103,7 @@ getlastoutput() {
   errorcode="${1:-1}"
   # Should the run be repeated, hand over a retry error code
   timeout="$(grep -c "exited with non-zero status 124" "$filename")"
-  # timeout and moor then 9 loop iterations
+  # timeout and more then 9 loop iterations
   [ "$timeout" -eq 1 ] && [ "${filename: -2}" -gt 9 ] && errorcode=4
   error ${LINENO} "an error occured on one of the nodes" "$errorcode"
 }

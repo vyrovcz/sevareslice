@@ -295,6 +295,7 @@ setParameters() {
     [ "$nodetasks" -gt 4 ] && error $LINENO "${FUNCNAME[0]}(): it appears host ${NODES[0]} is currently in use"
 
     # set experiment wide variables (append random num to mitigate conflicts)
+    # if value may contain a leading 0 (zero), add any char before (like manipulate)
     experimentvarpath="variables/experiment-variables-$NETWORK.yml"
     echo "experiment: $EXPERIMENT" > "$experimentvarpath"
     echo "manipulate: m$manipulate" >> "$experimentvarpath"

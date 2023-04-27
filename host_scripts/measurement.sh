@@ -128,14 +128,14 @@ pos_sync --timeout 300
 # run the SMC protocol
                               # skip 4th node here
 if [ "$splitroles" -eq 0 ] && [ "$player" -lt 3 ]; then
-    /bin/time -f "$timerf" timeout 300s ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
+    /bin/time -f "$timerf" timeout 420s ./search-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
                                 # skip 4th node here
 elif [ "$splitroles" -eq 1 ] && [ "$player" -lt 3 ]; then
-    /bin/time -f "$timerf" timeout 300s ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
+    /bin/time -f "$timerf" timeout 420s ./Scripts/split-roles-3-execute.sh -p "$player" -a "$ipA" -b "$ipB" &>> testresults || success=false
 elif [ "$splitroles" -eq 2 ]; then
-    /bin/time -f "$timerf" timeout 300s ./Scripts/split-roles-3to4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
+    /bin/time -f "$timerf" timeout 420s ./Scripts/split-roles-3to4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
 elif [ "$splitroles" -eq 3 ]; then
-    /bin/time -f "$timerf" timeout 300s ./Scripts/split-roles-4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
+    /bin/time -f "$timerf" timeout 420s ./Scripts/split-roles-4-execute.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" &>> testresults || success=false
 fi
 
 # divide external runtime x*j
