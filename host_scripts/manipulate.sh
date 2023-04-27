@@ -39,38 +39,6 @@ setQuota() {
     return 0
 }
 
-limitBandwidthold() {
-
-    #echo "${FUNCNAME[0]} - manipulate=$manipulate"
-    bandwidth=$(pos_get_variable bandwidths --from-loop)
-    NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
-    NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
-    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
-
-    # Manipulate every link between each node
-    if [ "$manipulate" == "1" ]; then
-        tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-        # check network topology - for directly connected hosts:
-        [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-        [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-    else
-    # Manipulate custom links
-        nodenumber=$player
-        # if 4 nodes and this node is active (player equals to nodenumber)
-        if [ ${#manipulate} -eq 4 ] && [ "${manipulate:nodenumber:1}" -eq 1 ]; then
-            # NIC0 is always connected to next node in the circularly sort defintion
-            # and equals to the next digit in the manipulate string/number
-            # (player+1)mod4 -> NIC0; (player+2)mod4 -> NIC1; (player+3) -> NIC2
-            # test if next nodes are active for manipulation
-            for nic in $NIC0 $NIC1 $NIC2; do
-                [ "${manipulate:(((++nodenumber) % 4)):1}" -eq 1 ] &&
-                    tc qdisc add dev "$nic" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
-            done
-        fi
-    fi
-    return 0
-}
-
 limitBandwidth() {
 
     nodenumber=$((player+1))
@@ -79,7 +47,6 @@ limitBandwidth() {
     # skip when code 7 -> do not manipulate any link
     [ "$nodemanipulate" -eq 7 ] && return 0
 
-    #echo "${FUNCNAME[0]} - manipulate=$manipulate"
     bandwidth=$(pos_get_variable bandwidths --from-loop)
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
@@ -117,13 +84,44 @@ limitBandwidth() {
 
 setLatency() {
 
+    nodenumber=$((player+1))
+    nodemanipulate="${manipulate:nodenumber:1}"
+
+    # skip when code 7 -> do not manipulate any link
+    [ "$nodemanipulate" -eq 7 ] && return 0
+
     latency=$(pos_get_variable latencies --from-loop)
     NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
     NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
     NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
-    tc qdisc add dev "$NIC0" root netem delay "$latency"ms
-    [ "$NIC1" != 0 ] && tc qdisc add dev "$NIC1" root netem delay "$latency"ms
-    [ "$NIC2" != 0 ] && tc qdisc add dev "$NIC2" root netem delay "$latency"ms
+
+    # three interconnected nodes
+    if [ "$partysize" -eq 3 ]; then
+        # the code to active NIC0 is 0 and 2, exclude 1 to match
+        [ "$nodemanipulate" -ne 1 ] &&
+            tc qdisc add dev "$NIC0" root netem delay "$latency"ms
+        # the code to active NIC1 is 1 and 2, exclude 0 to match
+        [ "$NIC1" != 0 ] && [ "$nodemanipulate" -ne 0 ] &&
+            tc qdisc add dev "$NIC1" root netem delay "$latency"ms
+
+    # four interconnected nodes
+    elif [ "$partysize" -eq 4 ]; then
+        NIC0codes=( 0 3 4 6 )
+        NIC1codes=( 1 3 5 6 )
+        NIC2codes=( 2 4 5 6 )
+
+        [[ ${NIC0codes[*]} =~ $nodemanipulate ]] &&
+            tc qdisc add dev "$NIC0" root netem delay "$latency"ms
+        [ "$NIC1" != 0 ] && [[ ${NIC1codes[*]} =~ ${nodemanipulate} ]] &&
+            tc qdisc add dev "$NIC1" root netem delay "$latency"ms
+        [ "$NIC2" != 0 ] && [[ ${NIC2codes[*]} =~ ${nodemanipulate} ]] &&
+            tc qdisc add dev "$NIC2" root netem delay "$latency"ms
+
+    # one NIC topology
+    else
+        tc qdisc add dev "$NIC0" root tbf rate "$bandwidth"mbit burst "$bandwidth"kb limit "$bandwidth"kb
+    fi
+
     return 0
 }
 
@@ -222,28 +220,6 @@ unlimitRAM() {
         # reset swapfile
         swapoff /swp/swp_file
         swapon /swp/swp_file
-    fi
-    return 0
-}
-
-resetTrafficControlold() {
-
-    NIC0=$(pos_get_variable "$(hostname)"NIC0 --from-global)
-    NIC1=$(pos_get_variable "$(hostname)"NIC1 --from-global) || NIC1=0
-    NIC2=$(pos_get_variable "$(hostname)"NIC2 --from-global) || NIC2=0
-
-    if [ "$manipulate" == "1" ]; then
-        tc qdisc delete dev "$NIC0" root
-        [ "$NIC1" != 0 ] && tc qdisc delete dev "$NIC1" root
-        [ "$NIC2" != 0 ] && tc qdisc delete dev "$NIC2" root
-    else
-        nodenumber=$player
-        if [ ${#manipulate} -eq 4 ] && [ "${manipulate:nodenumber:1}" -eq 1 ]; then
-            for nic in $NIC0 $NIC1 $NIC2; do
-                [ "${manipulate:(((++nodenumber) % 4)):1}" -eq 1 ] &&
-                    tc qdisc delete dev "$nic" root
-            done
-        fi
     fi
     return 0
 }
