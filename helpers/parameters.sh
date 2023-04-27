@@ -140,7 +140,7 @@ THREADS=( 1 )
 FUNCTION=( 0 )
 TXBUFFER=( 0 )
 RXBUFFER=( 0 )
-manipulate="m6666"
+manipulate="6666"
 
 INPUTS=( 4096 )
 CPUS=()
@@ -297,7 +297,7 @@ setParameters() {
     # set experiment wide variables (append random num to mitigate conflicts)
     experimentvarpath="variables/experiment-variables-$NETWORK.yml"
     echo "experiment: $EXPERIMENT" > "$experimentvarpath"
-    echo "manipulate: $manipulate" >> "$experimentvarpath"
+    echo "manipulate: m$manipulate" >> "$experimentvarpath"
 
     # generate loop-variables.yml (append random num to mitigate conflicts)
     loopvarpath="variables/loop-variables-$NETWORK.yml"
