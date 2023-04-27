@@ -250,7 +250,7 @@ resetTrafficControlold() {
 
 resetTrafficControl() {
 
-    nodenumber=$player
+    nodenumber=$((player+1))
     nodemanipulate="${manipulate:nodenumber:1}"
 
     # skip when code 7 -> do not manipulate any link
