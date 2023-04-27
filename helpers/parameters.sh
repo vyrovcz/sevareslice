@@ -140,7 +140,7 @@ THREADS=( 1 )
 FUNCTION=( 0 )
 TXBUFFER=( 0 )
 RXBUFFER=( 0 )
-manipulate="6666"
+manipulate="m6666"
 
 INPUTS=( 4096 )
 CPUS=()
