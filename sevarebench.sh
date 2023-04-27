@@ -47,6 +47,4 @@ for pid in "${PIDS[@]}"; do
 done
 echo "  done"
 
-
-
 RUNSTATUS="${Green}completed${Stop}"

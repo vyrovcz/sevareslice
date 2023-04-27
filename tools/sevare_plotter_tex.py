@@ -308,13 +308,14 @@ with open(sevaredir + "plotted/sevareplots.tex", "w") as file:
             elif "incomplete" in line:
                 aborted = "_aborted"
                 indentor(file, 2, r"Experiment run status: incomplete\\")
-            elif "manipulate" in line and "6666" not in line:
-                manipulation = "_" + line.strip().split(" ")[-1]
             elif "Nodes" in line:
                 node = line.split(" ")[6]
                 indentor(file, 2, line[:-1].replace("=", ":") + " (" + nodehardware[node] + ")" + r"\\")
             elif any(substring in line for substring in capture):
                 indentor(file, 2, line[:-1].replace("_", "\\_").replace("=", ":") + r"\\")
+                
+            if "manipulate" in line and "6666" not in line:
+                manipulation = "_" + line.strip().split(" ")[-1]
 
     indentor(file, 2, "Latex built date: " + time.strftime("%y.%m.%d %H:%M", time.gmtime()) + r"\\")
     indentor(file, 2, r"\vspace{50cm}")
