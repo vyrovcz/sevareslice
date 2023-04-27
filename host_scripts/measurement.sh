@@ -176,7 +176,6 @@ if [ "$splitroles" -gt 0 ] || [ "$threads" -gt 1 ]; then
 fi
 
 pos_sync
-sleep 1000m
 
 ####
 #  environment manipulation reset section start
